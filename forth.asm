@@ -6,7 +6,11 @@
 %INCLUDE "bmdev.asm"
 
   start:	
-	mov	r13,[start+rax+r8]	
+	mov	r8,[data_stack_base]
+	xor	r7, r7
+	mov	r9,[data_stack_mask]
+	mov	rsi,nfa_0+1
+	call	b_output
 	ret	
 	
 	
@@ -22,12 +26,16 @@
         mov [ r7 + r8 ] , eax
         ret
 ;-----------------------
+
+data_stack_base	dq	0x300000
+data_stack_mask	dq	0x0fffff
+
   nfa_0:
 	db 7, "FORTH64" ; ñëîâàðü äëÿ ñëîâ ðåàëüíîãî, âèðòóàëüíîãî 86
 	db 0 ; òåðìèíèðóþùå-âûðàâíèâàþùèå íóëè
-	align
+	align 8
 	dq 0 ;LFA
-	dq 0 ;CFA
+	dq 0 ;CFA8
  f86_list:
 	dq nfa_a ;PFA - óêàçàòåëü íà ëôà ïîñëåäíåãî îïðåäåëåííîãî ñëîâà
 	dq 0 ; ññûëêà íà ïðåäûäóùèé ñïèñîê. áåçáàçîâûé ñïèñîê
