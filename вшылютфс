@@ -28,36 +28,36 @@
 	;eax-sector
 	;cx-number of sectors
 	;es:edi-recieve buffer
-	push	eax
-	mov	dx,1f2h
+	push	rax
+	mov	rdx,1f2h
 	mov	al,cl
 	out	dx,al
-	xor	edx,edx
-	pop	eax
-	push	eax
-	div	[dword dtt]
-	push	eax
+	xor	rdx,rdx
+	pop	rax
+	push	rax
+;	div	[dword dtt]
+	push	rax
 	inc	dl
 	mov	al,dl
 	mov	dx,1f3h
 	out	dx,al
-	pop	eax
-	xor	edx,edx
-	div	[dword dtt+4]
-	push	eax
+	pop	rax
+	xor	rdx,rdx
+;	div	[dword dtt+4]
+	push	rax
 	mov	al,dl
 	mov	dx,1f6h
 	out	dx,al
-	pop	eax
+	pop	rax
 	mov	dx,1f4h
 	out	dx,al
 	inc	dx
 	mov	al,ah
 	out	dx,al
-	shl	cx,8
+	shl	rcx,8
 	inc	ch
 	mov	al,20h
-	mov	edx,1f001f7h
+	mov	rdx,1f001f7h
 	out	dx,al
 	m5:
 	in	al,dx
@@ -69,11 +69,11 @@
 	in	al,dx
 	test	al,080h
 	jne	m6
-	rol	edx,16
+	rol	rdx,16
 	insw
-	rol	edx,16
+	ror	rdx,16
 	loop	m6
-	pop	eax
+	pop	rax
 	endm
 
 
