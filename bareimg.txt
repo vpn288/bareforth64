@@ -1,0 +1,30 @@
+8192 CONSTANT block-size 
+
+512 CONSTANT vv
+
+S" baremetal.img" R/W OPEN-FILE THROW CONSTANT fid
+S" forth.app"	R/O OPEN-FILE THROW CONSTANT fidr
+
+CREATE buf block-size ALLOT  
+
+: read_block 
+	buf block-size fidr READ-FILE THROW . ;
+
+: write_block ;
+
+: tb 
+	buf 2048 DUMP ;
+
+: nn  BEGIN read_block tb KEY AGAIN ;
+
+: mm 
+	read_block tb
+	fid FILE-POSITION THROW DROP  
+	  ." hhh:"   512 / .  ;
+
+
+ 8192 256 * S>D fid REPOSITION-FILE THROW
+mm
+\ read_block
+
+\ +3 +4 - время и дата создания +5+6 время и дата изменения +7 CELLS - ФАКТИЧЕСКИЙ РАЗМЕР ФАЙЛА
