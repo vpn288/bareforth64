@@ -220,7 +220,7 @@ ret
 ;	RDI = RDI + (number of sectors read * 512)
 ;	All other registers preserved
 readsectors:
-mov byte [os_DiskEnabled], 0x01
+
 	push rbx
 	push rdi
 	push rsi
@@ -228,31 +228,28 @@ mov byte [os_DiskEnabled], 0x01
 	push rax
 	push	rdx
 	xor	al,al
-	mov	rdx,0x1f1
+	mov	rdx,0x1f1	; prezero
 	out	dx,al
 	pop	rdx
-	;push rcx			; Save the sector count
-	;push rdi			; Save the destination memory address
-	;push rax			; Save the block number
-	;push rax
 
-	shl rdx, 7			; Quick multiply by 0x80
-	add rdx, 0x100			; Offset to port 0
+	shl	rdx,4
 	mov	rbx,rdx
+
 	mov	rdx,0x1f2
 	mov	rax,rcx
 	out	dx,al			; send sector count
 	pop	rax
+
 	push	rax
 	mov	rdx,1f3h
 	out	dx,al		; send low 8 bit
-	inc 	rdx
+	inc 	rdx		;1f4
 	shr	rax,8		; send next 8 bit
 	out	dx,al
-	inc	rdx
+	inc	rdx		;1f5
 	shr	rax,8
 	out	dx,al		; send next 8 bit
-	inc	rdx
+	inc	rdx		;1f6
 	shr	rax,8
 	and	rax,0x0f
 	or	rax,rbx
@@ -261,9 +258,7 @@ mov byte [os_DiskEnabled], 0x01
 	inc	rdx
 	mov	rax,0x20
 	out	dx,al
-mov	rsi, msg7
-	call	os_output
-
+	
 m5:
 	mov	rdx,0x1f7
 	in al,dx
@@ -272,94 +267,11 @@ m5:
 	shl	rcx,8
 m6:
 	mov dx,0x1f0
-	;in al,dx
-	;in al,dx
-	;test al,0x80
-	;jne m6
-	;mov rdx,0x1f7
 	insw
 	loop m6
 	mov	rsi, msg6
 	call	os_output
-	;mov rsi, [ahci_base]
-
-	; Command list setup
-	;mov rdi, ahci_cmdlist		; command list (1K with 32 entries, 32 bytes each)
-	;xor eax, eax
-	;mov eax, 0x00010005		; 1 PRDTL Entry, Command FIS Length = 20 bytes
-	;stosd				; DW 0 - Description Information
-	;xor eax, eax
-	;stosd				; DW 1 - Command Status
-	;mov eax, ahci_cmdtable
-	;stosd				; DW 2 - Command Table Base Address
-	;xor eax, eax
-	;stosd				; DW 3 - Command Table Base Address Upper
-	;stosd
-	;stosd
-	;stosd
-	;stosd
-	; DW 4 - 7 are reserved
-
-	; Command FIS setup
-	;mov rdi, ahci_cmdtable		; Build a command table for Port 0
-	;mov eax, 0x00258027		; 25 READ DMA EXT, bit 15 set, fis 27 H2D
-	;stosd				; feature 7:0, command, c, fis
-	;pop rax				; Restore the start sector number
-	;shl rax, 36
-	;shr rax, 36			; Upper 36 bits cleared
-	;bts rax, 30			; bit 30 set for LBA
-	;stosd				; device, lba 23:16, lba 15:8, lba 7:0
-	;pop rax				; Restore the start sector number
-	;shr rax, 24
-	;stosd				; feature 15:8, lba 47:40, lba 39:32, lba 31:24
-	;mov rax, rcx			; Read the number of sectors given in rcx
-	;stosd				; control, ICC, count 15:8, count 7:0
-	;mov rax, 0x00000000
-	;stosd				; reserved
-
-	; PRDT setup
-	;mov rdi, ahci_cmdtable + 0x80
-	;pop rax				; Restore the destination memory address
-	;stosd				; Data Base Address
-	;shr rax, 32
-	;stosd				; Data Base Address Upper
-	;stosd				; Reserved
-	;pop rax				; Restore the sector count
-	;shl rax, 9			; multiply by 512 for bytes
-	;sub rax, 1			; subtract 1 (4.2.3.3, DBC is number of bytes - 1)
-	;stosd				; Description Information
-
-	;add rsi, rdx
-
-	;mov rdi, rsi
-	;add rdi, 0x10			; Port x Interrupt Status
-	;xor eax, eax
-	;stosd
-
-	;mov rdi, rsi
-	;add rdi, 0x18			; Offset to port 0
-	;mov eax, [rdi]
-	;bts eax, 4			; FRE
-	;bts eax, 0			; ST
-	;stosd
-
-	;mov rdi, rsi
-	;add rdi, 0x38			; Command Issue
-	;mov eax, 0x00000001		; Execute Command Slot 0
-	;stosd
-
-.poll:
-	;mov eax, [rsi+0x38]
-	;cmp eax, 0
-	;jne .poll
-
-	;mov rdi, rsi
-	;add rdi, 0x18			; Offset to port 0
-	;mov eax, [rdi]
-	;btc eax, 4			; FRE
-	;btc eax, 0			; ST
-	;stosd
-
+	
 	pop rax				; rax = start
 	pop rcx				; rcx = number of sectors read
 	add rax, rcx			; rax = start + number of sectors read
@@ -369,9 +281,9 @@ m6:
 	shl rbx, 9
 	add rdi, rbx
 	pop rbx
-ret
-msg6	db 'reading sector ',0
-msg7	db	'hhhhhuuuu ',0
+	ret
+dataadr	dq	0
+
 ; -----------------------------------------------------------------------------
 
 
