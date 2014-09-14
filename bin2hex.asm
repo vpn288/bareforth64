@@ -145,20 +145,19 @@ digit:
 
 
 m1:
-	shld	[hexstr+8],rax,8
-	rol	rax,8
-	shld	[hexstr+8],rbx,8
 	rol	rbx,8
+	shrd	[hexstr],rbx,8
+	rol	rax,8
+	shrd	[hexstr],rax,8	
 	loop	m1	
 	mov	rcx,4
 m3:
-	shld	[hexstr],rax,8
-	rol	rax,8
-	shld	[hexstr],rbx,8
 	rol	rbx,8
+	shrd	[hexstr+8],rbx,8
+	rol	rax,8
+	shrd	[hexstr+8],rax,8	
 	loop	m3
-
-	ret	
+	ret		
 
         
      
