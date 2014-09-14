@@ -100,19 +100,65 @@ digit:
         ret
         
         
-
-
-        
+;-----------------------------------------------
         mov     rax,[value]
         mov     rbx,rax
+      
+	mov	rdx,0f0f0f0f0f0f0f0fh
+	
+	shr	rbx,4
+        and     rax,rdx	
+        and     rbx,rdx
+      
+        mov	r9, 0606060606060606h
+	mov	r11,0d0d0d0d0d0d0d0dh
+
+	mov	rdx,rax
+	add	rdx,r9
+	
+	mov	r10,0f0f0f0f0f0f0f0f0h
+	and	rdx,r10
+	shr	rdx,2
+	mov	r12,rdx
+	shr	r12,1
+	or	rdx,r12
+	shr	r12,1
+	or	rdx,r12
+	add	rax,rdx
+	
+
+	mov	rdx,rbx
+	add	rdx,r9
+	and	rdx,r10
+	shr	rdx,2
+	mov	r12,rdx
+	shr	r12,1
+	or	rdx,r12
+	shr	r12,1
+	or	rdx,r12
+	add	rbx,rdx
+
+	mov	rdx,3030303030303030h 
+	add	rax,rdx
+	add	rbx,rdx
+	mov	rcx,4
+
+
+m1:
+	shld	[hexstr+8],rax,8
+	rol	rax,8
+	shld	[hexstr+8],rbx,8
+	rol	rbx,8
+	loop	m1	
+	mov	rcx,4
+m3:
+	shld	[hexstr],rax,8
+	rol	rax,8
+	shld	[hexstr],rbx,8
+	rol	rbx,8
+	loop	m3
+
+	ret	
+
         
-        and     rax,0f0f0f0f0f0f0f0fh
-        and     rbx,f0f0f0f0f0f0f0f0h
-        
-        shr     rbx,4
-        imul    rax,1f1f1f1f1f1f1f1fh
-        imul    rbx,1f1f1f1f1f1f1f1fh
-        shr     rax,4
-        shr     rbx,4
-        add     rax,3030303030303030h
-        add     rbx,3030303030303030h
+     
