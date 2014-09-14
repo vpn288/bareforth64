@@ -43,7 +43,7 @@ m2:
 ;-----------------------------------------------
 ;2-nd way optimisation addition
 
-mov     cx,8
+        mov     cx,8
         mov     si,value
         mov     di,hexstr
         add     si,cx            ;highest byte of value
@@ -72,10 +72,34 @@ m2:
         ret
         
 ;-----------------------------------------------
-;3-d way optimisation addition
+;3-d way without jnb
 
 
-
+mov     cx,8
+        mov     si,value
+        mov     di,hexstr
+        add     si,cx            ;highest byte of value
+m3:        
+        std
+        lodsb
+        mov     bl,al
+        and     al,0fh
+        call    digit
+        
+        cld
+        stosb
+        mov     al,bl
+        shr     al,4
+        call    digit
+        loop    m3
+        ret
+        
+digit:
+        mov     ah,30h
+        aam     17              ;trick aam with nonstandart parameter
+        ret
+        
+        
 
 
         
