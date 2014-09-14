@@ -41,7 +41,43 @@ m2:
         
         
 ;-----------------------------------------------
+;2-nd way optimisation addition
+
+mov     cx,8
+        mov     si,value
+        mov     di,hexstr
+        add     si,cx            ;highest byte of value
+m3:        
+        std
+        lodsb
+        mov     bl,al
+        and     al,0fh
+        call    digit
         
+        cld
+        stosb
+        mov     al,bl
+        shr     al,4
+        call    digit
+        loop    m3
+        ret
+        
+digit:
+        add     al,30h
+        cmp     al,39h
+        jnb     m2
+                                ;digit greater than 9
+        add     al,11h
+m2:
+        ret
+        
+;-----------------------------------------------
+;3-d way optimisation addition
+
+
+
+
+
         
         mov     rax,[value]
         mov     rbx,rax
