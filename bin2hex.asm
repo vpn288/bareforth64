@@ -159,5 +159,54 @@ m3:
 	loop	m3
 	ret		
 
-        
-     
+  ;-----------------------------------------------
+  	mov     rax,[value]
+  	mov     rbx,rax
+  	
+	mov	rdx,0f0f0f0f0f0f0f0fh
+	
+	shr	rbx,4
+        and     rax,rdx	
+        and     rbx,rdx
+      
+        mov	r9, 0606060606060606h
+	mov	r11,0d0d0d0d0d0d0d0dh
+
+	mov	rdx,rax
+	add	rdx,r9
+	
+	mov	r10,0f0f0f0f0f0f0f0f0h
+	and	rdx,r10
+	shr	rdx,2
+	mov	r12,rdx
+	shr	r12,1
+	or	rdx,r12
+	shr	r12,1
+	or	rdx,r12
+	add	rax,rdx
+
+	mov	rdx,rbx
+	add	rdx,r9
+	and	rdx,r10
+	shr	rdx,2
+	mov	r12,rdx
+	shr	r12,1
+	or	rdx,r12
+	shr	r12,1
+	or	rdx,r12
+	add	rbx,rdx
+
+	mov	rdx,3030303030303030h 
+	add	rax,rdx
+	add	rbx,rdx
+	mov	rcx,4
+
+	bswap	rax
+	bswap	rbx
+	mov	[hexstr],rax
+	mov	[hexstr+8],rbx
+	movdqu	xmm0,[hexstr]
+	movdqu	xmm1,[hexstr+8]
+	punpcklbw	xmm1,xmm0
+	movdqu	[hexstr],xmm1
+     	ret
