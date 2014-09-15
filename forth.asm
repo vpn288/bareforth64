@@ -1,89 +1,212 @@
 [BITS 64]
 [ORG 0x0000000000200000]
+
 %INCLUDE "bmdev.asm"
-start:	
+
+  start:
 	mov	r8,[data_stack_base]
 	xor	r10, r10
 	mov	r9,[data_stack_mask]
-
+	
 	mov	rax,nfa_0
 	call	_push
-	call	_count
-	call	_type
-	mov	rax,0x123456789abcdef0
-	call	rax_to_hex
-	mov	[numbr],rbx
-	mov	[numbr+8],rdx
-	mov	rsi,numbr
-	mov	rcx,16
-	call	b_output
+	mov	rax,8
+	call	_push
+	;call	_count
+	;call	_hex_dot
+	;call	_hex_dot
+	call	_type	
+	call	_cr
+	call	_space
+	mov	rdi, rkey
+	mov	rcx,32
+	m2:
+	call	[b_input_key]
+	jnc	m2
+	call	_push
+	call	_emit
+	
+	mov     rax,3A34567890abcdefh
+	call	_push
+	call	_hex_dot
+
+	mov	rsi,val128
+	mov	rcx,17
+	call	[b_output_chars]
+	ret
+	
 	ret	
 
+data_stack_base	dq	0x300000
+data_stack_mask	dq	0x0fffff
+sixes:		dq	 0606060606060606h
+		dq	0606060606060606h
+sevens:		dq	 0707070707070707h
+		dq	0707070707070707h
+foes:		dq	0f0f0f0f0f0f0f0fh
+		dq	0f0f0f0f0f0f0f0f0h
+zeroes:		dq	3030303030303030h
+		dq	3030303030303030h
+value:		dq	1234567890abcdefh
+val128:			
+digitslow	dq	0
+val129:
+digitshigh	dq	0	
+		db	20h,0	
+  _pop:
+        mov rax , [ r10 + r8 ]
+        sub r10 , 8
+	and r10 , r9
+	ret
+	    
+  _push:
+        add r10 , 8
+        and r10 , r9
+        mov [ r10 + r8 ] , rax
+        ret
 
-_pop:
-	mov rax , [ r10 + r8 ]
-	sub r10 , 8
-	and r10 , r9
-	ret
-_push:
-	add r10 , 8
-	and r10 , r9
-	mov [ r10 + r8 ] , rax
-	ret
-_typez:
+_hex_dot:
 	call	_pop
-	mov	rsi,rax
-	call	b_output
+        mov     rbx,rax
+      
+	mov	rdx,0f0f0f0f0f0f0f0fh
+	
+	shr	rbx,4
+        and     rax,rdx	
+        and     rbx,rdx
+      
+        mov	r13, 0606060606060606h
+	mov	r11,0d0d0d0d0d0d0d0dh
+
+	mov	rdx,rax
+	add	rdx,r13
+	
+	
+	mov	r10,0f0f0f0f0f0f0f0f0h
+	mov	r12,007070707070707070h
+	and	rdx,r10
+	shr	rdx,2
+	mov	r12,rdx
+	shr	r12,1
+	or	rdx,r12
+	shr	r12,1
+	or	rdx,r12
+	add	rax,rdx
+	
+	mov	rdx,rbx
+	add	rdx,r13
+	and	rdx,r10
+	shr	rdx,2
+	mov	r12,rdx
+	shr	r12,1
+	or	rdx,r12
+	shr	r12,1
+	or	rdx,r12
+	add	rbx,rdx
+
+	mov	rdx,3030303030303030h 
+	add	rax,rdx
+	add	rbx,rdx
+	bswap	rax
+	bswap	rbx
+	mov	[digitslow],rax
+	mov	[digitshigh],rbx
+	movdqu	xmm0,[val128]
+	movdqu	xmm1,[val129]
+	punpcklbw	xmm1,xmm0
+	movdqu	[val128],xmm1
+
+	call	_space
+	mov	rsi,val128
+	mov	rcx,16
+	call	[b_output_chars]
+	call	_space
 	ret
+
+;-----------------------
+
+_space:
+	mov	rax,' '
+	call	_push
+	call	_emit
+	ret
+
+;------------------------
+_emit:
+	;call	_pop
+	;mov	[_emit0],al
+	lea	rsi,[r10 + r8] ;_emit0
+	mov	rcx,1
+	call	[b_output_chars]
+	ret
+;------------------------
+_cr:
+	mov	rcx,2
+	mov	rsi,_cr_symb
+	call	[b_output_chars]
+	ret
+_cr_symb	db 0dh,0ah
+;------------------------
 _type:
 	call	_pop
 	mov	rcx,rax
 	call	_pop
+_type1:
 	mov	rsi,rax
-	call	b_output_chars
-	ret
 
+
+	call	[b_output_chars]
+	ret
+;-------------------------
 _count:
 	call	_pop
-	mov	cl,[rax]
-	and	rcx,0ffh
+	mov	rbx,rax	
+	mov	rbx,[rax]
+	and	rbx,03fh
 	inc	rax
-	call	_push
-	mov	rax,rcx
-	call	_push
-	ret
-
-low_nibble_of_al_to_hex:
-	; bl - result
-	and	al,0x0f
-	add	al,0x30
-	mov	bl,al
-	ret
 	
-rax_to_hex:
-	;result in rdx,rbx
-	mov	rcx,16
-	rol	rax,4
-	rth:
-	push	rax
-	shld	rdx,rbx,8
-	call	low_nibble_of_al_to_hex
-	pop	rax
-	rol	rax,4
-	loop	rth
+	call	_push
+	mov	rax,rbx
+	
+	call	_push
 	ret
 
-;-----------------------
-data_stack_base	dq	0x300000
-data_stack_mask	dq	0x0fffff
 
-numbr	dq	0,0
-	db	0
-nfa_0:
-db 7, "FORTH64" ;
-db 0 ; oa?ieie?o?ua-au?aaieaa?uea ioee
-align 8
-dq 0 ;LFA
-dq 0 ;CFA8
+msg:	db	' msgmsg', 0 
+rkey	times 32 db	0 
+align 8 , db 0aah
+  nfa_0:
+	db 7, "FORTH64" ; neiaa?u aey neia ?aaeuiiai, ae?ooaeuiiai 86
+	db 0 ; oa?ieie?o?ua-au?aaieaa?uea ioee
+	align 8 , db 0
+	dq 0 ;LFA
+	dq 0 ;CFA
+ f86_list:
+	dq nfa_a ;PFA - oeacaoaeu ia eoa iineaaiaai ii?aaaeaiiiai neiaa
+	dq 0 ; nnueea ia i?
 
-f86_list:
+nfa_1:
+	db	4,"HEX." ,0
+	align	8 , db 0
+	dq	nfa_0 
+	dq	_hex_dot
+	dq	0
+nfa_2:
+	db	4,"EMIT",0
+	align	8 , db 0
+	dq	nfa_1
+	dq	_emit
+	dq	0
+nfa_3:
+	db	2,"CR",0
+	align	8, db 0
+	dq	nfa_2
+	dq	_cr
+	dq	0
+nfa_4:
+	db	4,"TYPE",0
+	align	8, db 0
+	dq	nfa_3
+	dq	_type
+	dq	0
+nfa_a:
