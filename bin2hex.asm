@@ -75,7 +75,7 @@ m2:
 ;3-d way without jnb
 
 
-mov     cx,8
+	mov     cx,8
         mov     si,value
         mov     di,hexstr
         add     si,cx            ;highest byte of value
@@ -101,6 +101,29 @@ digit:
         
         
 ;-----------------------------------------------
+	mov     cx,8
+        mov     si,value
+        mov     di,hexstr
+        mov	bx,hextable
+        add     si,cx            ;highest byte of value
+m3:        
+        std
+        lodsb
+        mov	ah,al
+        and	al,0fh
+        xlatb
+        cld
+        stosb
+        mov	al,ah
+        shr	al,4
+        xlatb
+        stosb
+        loop	m3
+        ret
+ hextable	db	'0123456789ABCDEF'
+        
+;-----------------------------------------------
+
         mov     rax,[value]
         mov     rbx,rax
       
