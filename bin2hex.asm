@@ -210,3 +210,47 @@ m3:
 	punpcklbw	xmm1,xmm0
 	movdqu	[hexstr],xmm1
      	ret
+     	
+     	
+;--------------------------
+     	
+     	movdqu	xmm0,[value]
+	pxor	xmm1,xmm1
+	punpcklbw	xmm0,xmm1
+	movdqa	xmm1,xmm0
+	pand	xmm1,[efes]
+	psllq	xmm0,4
+	pand	xmm0,[efes]
+	por	xmm0,xmm1
+	
+	movdqa	xmm1,xmm0
+	paddb	xmm1,[sixes]
+	psrlq	xmm1,4
+	pand	xmm1,[efes]
+	
+	pxor	xmm9,xmm9
+	psubb	xmm9,xmm1
+	pand	xmm9,[sevens]
+	paddb	xmm0,xmm9
+
+	paddb	xmm0,[zeroes]
+	movdqu	[hexstr],xmm0
+
+	
+	mov	rax,[hexstr]
+	mov	rbx,[hexstr+8]
+	bswap	rax
+	bswap	rbx
+	mov	[hexstr],rbx
+	mov	[hexstr+8],rax
+	ret
+	
+efes:	dq	0f0f0f0f0f0f0f0fh
+	dq	0f0f0f0f0f0f0f0fh
+zeroes:	dq	3030303030303030h
+	dq	3030303030303030h
+sixes:	dq	0606060606060606h
+	dq	0606060606060606h
+sevens:	dq	0707070707070707h
+	dq	0707070707070707h	
+	
