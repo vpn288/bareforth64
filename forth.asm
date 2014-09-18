@@ -167,7 +167,7 @@ _variable_code:
 	call 	_push
 	ret
 ;-------------------------
-execute_code:
+_execute_code:
 	call 	_pop
 _execute:
 	call qword [rax]
@@ -183,7 +183,9 @@ _interpret:
 	call	_bl
 	call	_word
 	call	_find
-	;call	_execute
+	call	_pop
+	;call	_hex_dot	
+	call	_execute_code
 	ret
 
 _bl:
@@ -194,7 +196,7 @@ _bl:
 
 _word:
 	mov	rsi,rkey
-	mov	rdi,[f64_list]
+	mov	rdi,_here
 	mov	rbx,rdi
 	mov	rcx,[nkey]
 	xor	rdx,rdx
@@ -225,7 +227,44 @@ _word2:
 ;search string from top of wordlist in wordlist
 
 _find:
-
+	mov	rsi,nfa_last ;[f64_list]
+_find2:
+	movzx	rbx,byte [rsi]
+	inc	bl
+	and	bl,0f8h
+	mov	rdi,_here
+	cmpsq
+	
+	je	_find1
+	add	rsi,rbx
+	mov	rsi,[rsi]
+	push	rdi
+	push	rsi
+	mov	rax,rsi
+	call	_push
+	call	_hex_dot
+	pop	rsi
+	push	rsi
+	call	[b_output]
+	pop	rsi
+	pop	rdi
+	
+	test	rsi,rsi
+	jne	_find2
+	mov	rax,_here
+	call	_push
+	xor	rax,rax
+	call	_push
+	ret
+	
+_find1:
+	mov	rax,rsi
+	add	rax,8
+	call	_push
+	xor	rax,rax
+	dec	rax
+	call	_push
+	
 	ret
 
 msg:	db	' msgmsg', 0 
@@ -241,7 +280,7 @@ align 16 , db 0aah
 	dq 0 ;LFA
 	dq 0 ;CFA
  f64_list:
-	dq nfa_a ;PFA - oeacaoaeu ia eoa iineaaiaai ii?aaaeaiiiai neiaa
+	dq nfa_last ;PFA - oeacaoaeu ia eoa iineaaiaai ii?aaaeaiiiai neiaa
 	dq 0 ; nnueea ia i?
 
 nfa_1:
@@ -286,4 +325,16 @@ nfa_7:
 	dq	nfa_6
 	dq	_fetch
 	dq	0	
-nfa_a:
+nfa_8:
+	db	7,"CONTEXT",0
+	align	8, db 0
+	dq	nfa_7
+	dq	0; _variable
+	dq	f64_list
+nfa_last:
+	db	1," ",0
+	align	8, db 0
+	dq	nfa_8
+	dq	0
+	dq	0
+_here:
