@@ -8,51 +8,45 @@
 	xor	r10, r10
 	mov	r9,[data_stack_mask]
 	
+	call	_cr
 	mov	rax,nfa_0
 	call	_push
-	mov	rax,8
-	call	_push
-	;call	_count
-	;call	_hex_dot
-	;call	_hex_dot
+	call	_count
 	call	_type	
 	call	_cr
 	call	_space
 	mov	rdi, rkey
-	mov	rcx,32
-	m2:
-	call	[b_input_key]
-	jnc	m2
-	call	_push
-	call	_emit
+	mov	rcx,64
 	
-	mov     rax,3A34567890abcdefh
+	call	[b_input]
+	mov	[nkey],rcx
+	;mov	rax,[rkey]
+	mov	rax,rcx
 	call	_push
 	call	_hex_dot
 
-	mov	rsi,val128
-	mov	rcx,17
-	call	[b_output_chars]
-	ret
+	call	_interpret
 	
+	mov	rax,[f64_list]
+	mov	rax,[rax]
+	;mov     rax,3A34567890abcdefh
+	call	_push
+	call	_hex_dot
+	mov	rax,rcx
+	call	_push
+	call	_hex_dot
 	ret	
 
 data_stack_base	dq	0x300000
 data_stack_mask	dq	0x0fffff
-sixes:		dq	 0606060606060606h
-		dq	0606060606060606h
-sevens:		dq	 0707070707070707h
-		dq	0707070707070707h
-foes:		dq	0f0f0f0f0f0f0f0fh
-		dq	0f0f0f0f0f0f0f0f0h
-zeroes:		dq	3030303030303030h
-		dq	3030303030303030h
+
 value:		dq	1234567890abcdefh
 val128:			
 digitslow	dq	0
 val129:
 digitshigh	dq	0	
 		db	20h,0	
+
   _pop:
         mov rax , [ r10 + r8 ]
         sub r10 , 8
@@ -151,10 +145,7 @@ _type:
 	call	_pop
 	mov	rcx,rax
 	call	_pop
-_type1:
 	mov	rsi,rax
-
-
 	call	[b_output_chars]
 	ret
 ;-------------------------
@@ -170,18 +161,86 @@ _count:
 	
 	call	_push
 	ret
+;-------------------------
+_variable_code:
+	add	rax,4
+	call 	_push
+	ret
+;-------------------------
+execute_code:
+	call 	_pop
+_execute:
+	call qword [rax]
+	ret
+;------------------------
+_fetch:
+	call _pop
+	mov rax,[rax]
+	call _push
+	ret
+;-------------------------
+_interpret:
+	call	_bl
+	call	_word
+	call	_find
+	;call	_execute
+	ret
 
+_bl:
+	ret
+
+;-------------------------
+;get string from input buffer parse it and put to top of wordlist
+
+_word:
+	mov	rsi,rkey
+	mov	rdi,[f64_list]
+	mov	rbx,rdi
+	mov	rcx,[nkey]
+	xor	rdx,rdx
+	inc	rdi
+_word1:
+	lodsb
+	cmp	al,20h
+	je	_word1
+	stosb
+	inc	rdx
+	dec	rcx
+	je	_word2
+_word3:
+	lodsb
+	cmp	al,20h
+	je	_word2
+	stosb
+	inc	rdx
+	dec	rcx
+	jne	_word3
+	
+_word2:
+	
+	mov	[rdi],byte 0
+	mov	[rbx],dl
+	ret
+;-------------------------------
+;search string from top of wordlist in wordlist
+
+_find:
+
+	ret
 
 msg:	db	' msgmsg', 0 
-rkey	times 32 db	0 
-align 8 , db 0aah
+align 32 , db 0cch
+
+rkey	times 64 db	0 
+nkey	dq	0
+align 16 , db 0aah
   nfa_0:
 	db 7, "FORTH64" ; neiaa?u aey neia ?aaeuiiai, ae?ooaeuiiai 86
 	db 0 ; oa?ieie?o?ua-au?aaieaa?uea ioee
 	align 8 , db 0
 	dq 0 ;LFA
 	dq 0 ;CFA
- f86_list:
+ f64_list:
 	dq nfa_a ;PFA - oeacaoaeu ia eoa iineaaiaai ii?aaaeaiiiai neiaa
 	dq 0 ; nnueea ia i?
 
@@ -209,4 +268,22 @@ nfa_4:
 	dq	nfa_3
 	dq	_type
 	dq	0
+nfa_5:
+	db	5,"COUNT",0
+	align	8, db 0
+	dq	nfa_4
+	dq	_count
+	dq	0
+nfa_6:
+	db	5,"SPACE",0
+	align	8, db 0
+	dq	nfa_5
+	dq	_space
+	dq	0
+nfa_7:
+	db	1,"@",0
+	align	8, db 0
+	dq	nfa_6
+	dq	_fetch
+	dq	0	
 nfa_a:
