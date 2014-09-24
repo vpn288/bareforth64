@@ -15,107 +15,97 @@
 	call	_type	
 	call	_cr
 	call	_space
+_f_system:
+	mov	qword [_in_value],0
+	rdtsc
+	shl	rax,32
+	shrd	rax,rdx,32
+	call	_push
+	call	_hex_dot
+	mov	rsi,msgf
+	
+	call	[b_output]
+	;call	_cr
+
 	mov	rdi, rkey
 	mov	rcx,64
 	
 	call	[b_input]
 	mov	[nkey],rcx
-	;mov	rax,[rkey]
-	mov	rax,rcx
-	call	_push
-	call	_hex_dot
-
+	;mov	rax,rcx
+	;call	_push
+	;call	_hex_dot
 	call	_interpret
 	
-	mov	rax,[f64_list]
-	mov	rax,[rax]
-	;mov     rax,3A34567890abcdefh
-	call	_push
-	call	_hex_dot
-	mov	rax,rcx
-	call	_push
-	call	_hex_dot
+	jmp	_f_system
+	
 	ret	
 
+msgf	db	'forth>',0 
 data_stack_base	dq	0x300000
 data_stack_mask	dq	0x0fffff
 
-value:		dq	1234567890abcdefh
-val128:			
-digitslow	dq	0
-val129:
-digitshigh	dq	0	
-		db	20h,0	
-
+;------------------------------
   _pop:
         mov rax , [ r10 + r8 ]
         sub r10 , 8
 	and r10 , r9
 	ret
-	    
+;------------------------------	    
   _push:
         add r10 , 8
         and r10 , r9
         mov [ r10 + r8 ] , rax
         ret
-
+;--------------------------------
 _hex_dot:
 	call	_pop
-        mov     rbx,rax
+        mov     [value],rax
       
-	mov	rdx,0f0f0f0f0f0f0f0fh
-	
-	shr	rbx,4
-        and     rax,rdx	
-        and     rbx,rdx
-      
-        mov	r13, 0606060606060606h
-	mov	r11,0d0d0d0d0d0d0d0dh
-
-	mov	rdx,rax
-	add	rdx,r13
-	
-	
-	mov	r10,0f0f0f0f0f0f0f0f0h
-	mov	r12,007070707070707070h
-	and	rdx,r10
-	shr	rdx,2
-	mov	r12,rdx
-	shr	r12,1
-	or	rdx,r12
-	shr	r12,1
-	or	rdx,r12
-	add	rax,rdx
-	
-	mov	rdx,rbx
-	add	rdx,r13
-	and	rdx,r10
-	shr	rdx,2
-	mov	r12,rdx
-	shr	r12,1
-	or	rdx,r12
-	shr	r12,1
-	or	rdx,r12
-	add	rbx,rdx
-
-	mov	rdx,3030303030303030h 
-	add	rax,rdx
-	add	rbx,rdx
+	movdqu	xmm0,[value]
+	pxor	xmm1,xmm1
+	punpcklbw	xmm0,xmm1
+	movdqa	xmm1,xmm0
+	pand	xmm1,[efes]
+	psllq	xmm0,4
+	pand	xmm0,[efes]
+	por	xmm0,xmm1
+	movdqa	xmm1,xmm0
+	paddb	xmm1,[sixes]
+	psrlq	xmm1,4
+	pand	xmm1,[efes]
+	pxor	xmm9,xmm9
+	psubb	xmm9,xmm1
+	pand	xmm9,[sevens]
+	paddb	xmm0,xmm9
+	paddb	xmm0,[zeroes]
+	movdqu	[hexstr],xmm0
+	mov	rax,[hexstr]
+	mov	rbx,[hexstr+8]
 	bswap	rax
 	bswap	rbx
-	mov	[digitslow],rax
-	mov	[digitshigh],rbx
-	movdqu	xmm0,[val128]
-	movdqu	xmm1,[val129]
-	punpcklbw	xmm1,xmm0
-	movdqu	[val128],xmm1
+	mov	[hexstr],rbx
+	mov	[hexstr+8],rax
 
 	call	_space
-	mov	rsi,val128
+	mov	rsi,hexstr
 	mov	rcx,16
 	call	[b_output_chars]
 	call	_space
 	ret
+
+value	dq	0
+	dq	0
+hexstr times 16 db 0
+
+efes:	dq	0f0f0f0f0f0f0f0fh
+	dq	0f0f0f0f0f0f0f0fh
+zeroes:	dq	3030303030303030h
+	dq	3030303030303030h
+sixes:	dq	0606060606060606h
+	dq	0606060606060606h
+sevens:	dq	0707070707070707h
+	dq	0707070707070707h
 
 ;-----------------------
 
@@ -132,12 +122,14 @@ _emit:
 	lea	rsi,[r10 + r8] ;_emit0
 	mov	rcx,1
 	call	[b_output_chars]
+	call	_pop
 	ret
 ;------------------------
 _cr:
 	mov	rcx,2
 	mov	rsi,_cr_symb
 	call	[b_output_chars]
+	
 	ret
 _cr_symb	db 0dh,0ah
 ;------------------------
@@ -163,7 +155,7 @@ _count:
 	ret
 ;-------------------------
 _variable_code:
-	add	rax,4
+	add	rax,8
 	call 	_push
 	ret
 ;-------------------------
@@ -179,14 +171,22 @@ _fetch:
 	call _push
 	ret
 ;-------------------------
+_dup:
+	call	_pop
+	call	_push
+	call	_push
+	ret
+;-------------------------
 _interpret:
-	call	_bl
+	;call	_bl
 	call	_word
 	call	_find
 	call	_pop
+	;call	_hex_dot
+	;call	_dup	
 	;call	_hex_dot	
 	call	_execute_code
-	ret
+	jmp	_interpret
 
 _bl:
 	ret
@@ -195,34 +195,110 @@ _bl:
 ;get string from input buffer parse it and put to top of wordlist
 
 _word:
+	
+	
+	xor	rdx,rdx
 	mov	rsi,rkey
+	add	rsi,[_in_value]
+	
+	;push	rsi
+	;mov	rsi,msg6
+	;call	[b_output]
+	;pop	rsi
+	;push	rsi
+	;call	[b_output]
+	;mov	rax,rsi
+	;call	_push
+	;call	_hex_dot
+	;pop	rsi
+
 	mov	rdi,_here
 	mov	rbx,rdi
 	mov	rcx,[nkey]
-	xor	rdx,rdx
+	cmp	rcx,rdx
+	jl	_word2	
+
 	inc	rdi
+	
 _word1:
+	; skip delimeters
+	;push	rsi
+	;mov	rsi,msg5
+	;call	[b_output]
+	;pop	rsi
+	
+	sub	qword [nkey],1
+	jb	_word2
 	lodsb
+	inc	qword [_in_value]
 	cmp	al,20h
 	je	_word1
-	stosb
-	inc	rdx
-	dec	rcx
-	je	_word2
+
 _word3:
-	lodsb
-	cmp	al,20h
-	je	_word2
+	
 	stosb
 	inc	rdx
-	dec	rcx
+
+	;push	rsi
+	;mov	rsi,msg4
+	;call	[b_output]
+	;mov	rax,[nkey]
+	;;push	rbx
+	;call	_push
+	;call	_hex_dot
+	;pop	rbx
+	;pop	rsi
+
+	sub	qword [nkey],1
+	
+	jb	_word4
+	lodsb
+	inc	qword [_in_value]	
+	cmp	al,20h
 	jne	_word3
 	
+
+_word4:
+	;dec	rsi
+	;mov	r11,rsi
+	; string to validate
+	mov	[rbx],dl
+	;sub	rsi,rkey
+	;mov	r11,rsi
+	;add	[_in_value],rsi
+	;dec	qword [_in_value]
+	;mov	rax,r11
+	
+	;push	rbx
+	;call	_push
+	;call	_hex_dot
+	;pop	rbx
+	;mov	rsi,msg2
+	;call	[b_output]
+	;mov	rsi,rbx
+	;call	[b_output]
+	;mov	rax,[rbx]
+	;call	_push
+	;call	_hex_dot
+	;call	_cr
+	ret
+
 _word2:
 	
-	mov	[rdi],byte 0
-	mov	[rbx],dl
+	; empty string
+	;mov	rsi,msg3
+	;call	[b_output]
+	mov	qword [rbx],6 ;dl
+	mov	qword [_in_value],0
+	;mov	rax,[_in_value]
+	
 	ret
+
+msg2	db	' String prepared to find:',0
+msg3	db	' empty string ',0
+msg4	db	' push symbol ',0
+msg5	db	' skips ',0
+msg6	db	' source string ',0
 ;-------------------------------
 ;search string from top of wordlist in wordlist
 
@@ -238,20 +314,21 @@ _find2:
 	je	_find1
 	add	rsi,rbx
 	mov	rsi,[rsi]
-	push	rdi
-	push	rsi
-	mov	rax,rsi
-	call	_push
-	call	_hex_dot
-	pop	rsi
-	push	rsi
-	call	[b_output]
-	pop	rsi
-	pop	rdi
+	;push	rdi
+	;push	rsi
+	;mov	rax,rsi
+	;;call	_push
+	;call	_hex_dot
+	;pop	rsi
+	;push	rsi
+	;call	[b_output]
+	;pop	rsi
+	;pop	rdi
 	
 	test	rsi,rsi
 	jne	_find2
-	mov	rax,_here
+	;mov	rax,_here
+	mov	rax,ret
 	call	_push
 	xor	rax,rax
 	call	_push
@@ -264,10 +341,20 @@ _find1:
 	xor	rax,rax
 	dec	rax
 	call	_push
+	ret
+;-------------------
+_ret:
+	pop	rax
+	pop	rax
 	
 	ret
+;--------------------
+_constant:
+ 	mov 	rax,[rax+8]
+	call 	_push
+	ret
 
-msg:	db	' msgmsg', 0 
+
 align 32 , db 0cch
 
 rkey	times 64 db	0 
@@ -325,16 +412,34 @@ nfa_7:
 	dq	nfa_6
 	dq	_fetch
 	dq	0	
+
 nfa_8:
 	db	7,"CONTEXT",0
 	align	8, db 0
 	dq	nfa_7
-	dq	0; _variable
+	dq	_variable_code
 	dq	f64_list
-nfa_last:
-	db	1," ",0
+
+nfa_9:	
+	db	3,">IN",0
 	align	8, db 0
 	dq	nfa_8
+	dq	_variable_code
+_in_value:
 	dq	0
+
+nfa_10:	
+	db	2,"de",0
+	align	8, db 0
+	dq	nfa_9
+	dq	_constant
+	dq	123def4578h
+	
+nfa_last:
+	db	6,0,0
+	align	8, db 0
+	dq	nfa_10
+ret:
+	dq	_ret
 	dq	0
 _here:
