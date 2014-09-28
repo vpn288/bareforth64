@@ -16,6 +16,7 @@
 	call	_cr
 	call	_space
 _f_system:
+	call	_cr
 	mov	qword [_in_value],0
 	rdtsc
 	shl	rax,32
@@ -214,6 +215,11 @@ _word:
 
 	mov	rdi,_here
 	mov	rbx,rdi
+	; clear 32 bytes
+	xor	rax,rax
+	mov	rcx,4
+	rep	stosq
+	mov	rdi,rbx
 	mov	rcx,[nkey]
 	cmp	rcx,rdx
 	jl	_word2	
@@ -320,9 +326,11 @@ _find2:
 	;;call	_push
 	;call	_hex_dot
 	;pop	rsi
+	
 	;push	rsi
 	;call	[b_output]
 	;pop	rsi
+	
 	;pop	rdi
 	
 	test	rsi,rsi
@@ -335,6 +343,7 @@ _find2:
 	ret
 	
 _find1:
+	add	rsi,rbx
 	mov	rax,rsi
 	add	rax,8
 	call	_push
@@ -429,16 +438,21 @@ _in_value:
 	dq	0
 
 nfa_10:	
-	db	2,"de",0
+	db	3,"DUP",0
 	align	8, db 0
 	dq	nfa_9
+	dq	_dup
+	dq	0
+nfa_11:	
+	db	2,"dq",0
+	align	8, db 0
+	dq	nfa_10
 	dq	_constant
-	dq	123def4578h
-	
+	dq	200500h	
 nfa_last:
 	db	6,0,0
 	align	8, db 0
-	dq	nfa_10
+	dq	nfa_11
 ret:
 	dq	_ret
 	dq	0
