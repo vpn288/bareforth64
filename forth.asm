@@ -17,25 +17,6 @@
 	call	_space
 _f_system:
 	call	_cr
-[BITS 64]
-[ORG 0x0000000000200000]
-
-%INCLUDE "bmdev.asm"
-
-  start:
-	mov	r8,[data_stack_base]
-	xor	r10, r10
-	mov	r9,[data_stack_mask]
-	
-	call	_cr
-	mov	rax,nfa_0
-	call	_push
-	call	_count
-	call	_type	
-	call	_cr
-	call	_space
-_f_system:
-	call	_cr
 	mov	qword [_in_value],0
 	rdtsc
 	shl	rax,32
@@ -55,8 +36,8 @@ _f_system:
 	;mov	rax,rcx
 	;call	_push
 	;call	_hex_dot
-	call	_interpret
-	
+	;call	_interpret
+	call	_0x
 	jmp	_f_system
 	
 	ret	
@@ -390,6 +371,54 @@ _addr_interp:
 	pop rax
 	jmp _addr_interp
 
+;------------------
+_0x:
+	call	_pop
+	mov		rbx,[rax]
+	bswap	rbx
+	
+	mov		rcx,[rax+8]
+	bswap	rcx
+	mov	[rax+8],rbx
+	mov	[rax],rcx
+	
+	movdqu		xmm0,[rax]
+	
+	movdqu		xmm2,[efes]
+	movdqu		xmm3,[sixes]
+	movdqu		xmm4,[zeroes]
+	movdqu		xmm7,[bytemask]
+	psubb		xmm0,xmm4	; ????? ????
+	paddb		xmm0,xmm3	; ???? ?????
+	movdqa		xmm5,xmm0	;
+	pand		xmm0,xmm2	
+	psubb		xmm0,xmm3	;????? ?????
+	psrlq		xmm5,4
+	pand		xmm5,xmm2	;???????? ?????? ????????
+	paddb		xmm0,xmm5
+	psllq		xmm5,3
+	por			xmm0,xmm5
+	movdqa		xmm6,xmm0
+	
+	pxor		xmm8,xmm8
+	
+	pand		xmm0,xmm7
+	psrlq		xmm6,8
+	pand		xmm6,xmm7
+	
+	packsswb	xmm0,xmm8
+	packsswb	xmm6,xmm8
+	psllq		xmm6,4
+	por			xmm0,xmm6
+
+	movdqu	[value],xmm0
+	mov		rax,[value]
+	call	_push
+	ret
+
+bytemask	dq	0ff00ff00ff00ffh
+			dq	0ff00ff00ff00ffh
+;------------------
 align 32 , db 0cch
 
 rkey	times 64 db	0 
