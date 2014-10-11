@@ -96,7 +96,8 @@ m3:
         
 digit:
         mov     ah,30h
-        aam     17              ;trick aam with nonstandart parameter
+        aaa
+        aad     17              ;trick aad with nonstandart parameter
         ret
         
         
