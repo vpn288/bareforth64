@@ -99,7 +99,40 @@ digit:
         aaa
         aad     17              ;trick aad with nonstandart parameter
         ret
+;-----------------------------------------------
+;4-d way without jnb
+
+
+	mov     cx,8
+        mov     si,value
+        mov     di,hexstr
+        add     si,cx            ;highest byte of value
+m3:        
+        std
+        lodsb
+        mov     bl,al
+        and     al,0fh
+        call    digit
         
+        cld
+        stosb
+        mov     al,bl
+        shr     al,4
+        call    digit
+        loop    m3
+        ret
+        
+digit:
+     
+	MOV BL,0Ah
+	xor	ah,ah
+       DIV BL
+          MOV BH,AL
+       SHL AL,4
+         ADD AL,BH
+         ADD AL,30h
+
+        ret        
         
 ;-----------------------------------------------
 	mov     cx,8
