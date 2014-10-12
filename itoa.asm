@@ -1,22 +1,34 @@
-<spoiler title="Unpuck and carry">
-<source lang="Assembler">
-         mov rdx,0f0f0f0f0f0f0f0fh
-         mov rcx,0606060606060606h
-         mov rbp,3030303030303030h
-         mov rbx,rax
-         and rax,rdx
-         mov rdi,rax ;копия пригодится позже
-         shr rbx,4
-         and rbx,rdx
-         add rax,rcx
-         shr rax,4
-         and rax,rdx ; теперь в тех байтах, которые соответствуют цифрам больше 9, находятся единицы. В других - нули.
-         mov rsi,rax
-         shl rsi,3
-         or  rax,rsi ;теперь там, где были единицы, наличествуют 11h
-         or rax,rdi
-         add rax,rbp ;А здесь в rax получились ASCII символы четных цифр исходного числа.
-</source></spoiler>; convert bin value to ascii hex string
+mov rdx,0f0f0f0f0f0f0f0fh
+     mov rcx,0606060606060606h
+     mov rbp,3030303030303030h
+                 mov rbx,rax
+     and rax,rdx
+     mov rdi,rax ;????? ?????????? ?????
+                 shr rbx,4
+                 and rbx,rdx
+                 mov r9,rbx
+     add rax,rcx
+                 add rbx,rcx
+     shr rax,4
+                 shr rbx,4
+     and rax,rdx
+                 and rbx,rdx ; ?????? ? ??? ??????, ??????? ????????????? ?????? ?????? 9, ????????? ???????. ? ?????? - ????.
+     mov rsi,rax
+                 mov r8,rbx
+     shl rsi,1
+                 shl r8,1
+     or rax,rsi
+                 or rbx,r8
+     shl rsi,1
+                shl r8,1
+     or rax,rsi
+                or rbx,r8
+     add rax,rbp
+                add rbx,rbp ;?????? ???, ??? ???? ???????, ???????????? 11h
+     add rax,rdi
+                add rbx,r9
+     mov [_message],rax
+                mov [_message+8],rbx  ; convert bin value to ascii hex string
 ; [value]
 ; NASM
 
