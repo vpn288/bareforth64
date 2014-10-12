@@ -1,4 +1,22 @@
-; convert bin value to ascii hex string
+<spoiler title="Unpuck and carry">
+<source lang="Assembler">
+         mov rdx,0f0f0f0f0f0f0f0fh
+         mov rcx,0606060606060606h
+         mov rbp,3030303030303030h
+         mov rbx,rax
+         and rax,rdx
+         mov rdi,rax ;копия пригодится позже
+         shr rbx,4
+         and rbx,rdx
+         add rax,rcx
+         shr rax,4
+         and rax,rdx ; теперь в тех байтах, которые соответствуют цифрам больше 9, находятся единицы. В других - нули.
+         mov rsi,rax
+         shl rsi,3
+         or  rax,rsi ;теперь там, где были единицы, наличествуют 11h
+         or rax,rdi
+         add rax,rbp ;А здесь в rax получились ASCII символы четных цифр исходного числа.
+</source></spoiler>; convert bin value to ascii hex string
 ; [value]
 ; NASM
 
