@@ -2,7 +2,7 @@
 [ORG 0x0000000000200000]
 
 %INCLUDE "bmdev.asm"
-
+ tracefind equ 0
   start:
 	mov	r8,[data_stack_base]
 	xor	r10, r10
@@ -36,8 +36,8 @@ _f_system:
 	;mov	rax,rcx
 	;call	_push
 	;call	_hex_dot
-	;call	_interpret
-	call	_0x
+	call	_interpret
+	;call	_0x
 	jmp	_f_system
 	
 	ret	
@@ -226,19 +226,7 @@ _word:
 
 	inc	rdi
 	
-_word1:
-	; skip delimeters
-	;push	rsi
-	;mov	rsi,msg5
-	;call	[b_output]
-	;pop	rsi
-	
-	sub	qword [nkey],1
-	jb	_word2
-	lodsb
-	inc	qword [_in_value]
-	cmp	al,20h
-	je	_word1
+	call	_skip_delimeters
 
 _word3:
 	
@@ -320,19 +308,21 @@ _find2:
 	je	_find1
 	add	rsi,rbx
 	mov	rsi,[rsi]
-	;push	rdi
-	;push	rsi
-	;mov	rax,rsi
-	;;call	_push
-	;call	_hex_dot
-	;pop	rsi
+
+%if tracefind = 1
+	push	rdi
+	push	rsi
+	mov	rax,rsi
+	call	_push
+	call	_hex_dot
+	pop	rsi
 	
-	;push	rsi
-	;call	[b_output]
-	;pop	rsi
+	push	rsi
+	call	[b_output]
+	pop	rsi
 	
-	;pop	rdi
-	
+	pop	rdi
+%endif	
 	test	rsi,rsi
 	jne	_find2
 	;mov	rax,_here
@@ -419,8 +409,27 @@ _0x:
 bytemask	dq	0ff00ff00ff00ffh
 			dq	0ff00ff00ff00ffh
 ;------------------
+_skip_delimeters:
+	
+	;push	rsi
+	;mov	rsi,msg5
+	;call	[b_output]
+	;pop	rsi
+	
+	sub	qword [nkey],1
+	jb	_word2
+	lodsb
+	inc	qword [_in_value]
+	cmp	al,20h
+	je	_skip_delimeters
+	ret
+	
+	
+;--------------------
+
 align 32 , db 0cch
 
+test4:	db	'1234567890ABCDEF'
 rkey	times 64 db	0 
 nkey	dq	0
 align 16 , db 0aah
@@ -519,17 +528,39 @@ push_:
 	dq	0
 
 nfa_13:
-	db	3,"pet",0
+	db	4,"(0x)",0
 	align	8, db	0
 	dq	nfa_12
+	dq	_0x
+	dq	0
+
+nfa_14:
+	db	4,"HERE",0
+	align	8, db	0
+	dq	nfa_13
+	dq	_constant
+here_value:
+	dq	_here
+
+nfa_15:
+	db	2,"0x",0
+	align	8, db	0
+	dq	nfa_14
+	dq	_addr_interp
+	dq	ret_
+	
+nfa_16:
+	db	3,"pet",0
+	align	8, db	0
+	dq	nfa_15
 
 	dq	_constant
-	dq	0200480h
+	dq	test4
 	
 nfa_last:
 	db	6,0,0
 	align	8, db 0
-	dq	nfa_13
+	dq	nfa_16
 ret_:
 	dq	_ret
 	dq	0
