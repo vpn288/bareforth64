@@ -426,6 +426,82 @@ _skip_delimeters:
 	
 	
 ;--------------------
+number:
+	
+	
+	xor	rdx,rdx
+	mov	rsi,rkey
+	add	rsi,[_in_value]
+	
+	;push	rsi
+	;mov	rsi,msg6
+	;call	[b_output]
+	;pop	rsi
+	;push	rsi
+	;call	[b_output]
+	;mov	rax,rsi
+	;call	_push
+	;call	_hex_dot
+	;pop	rsi
+
+	mov	rdi,[here_value]
+	mov	rbx,rdi
+	; fill 32 bytes with zeroes
+	mov	rax,30h
+	mov	rcx,32
+	rep	stosb
+	
+	mov	rdi,rbx
+	mov	rcx,[nkey]
+	cmp	rcx,rdx ; rdx=0
+	jl	number2	
+
+	inc	rdi
+	
+	call	_skip_delimeters
+	mov		rdi,[here_value]
+	add		rdi,15
+	
+number3:
+	; move to here +15
+	stosb
+	inc	rdx
+
+	;push	rsi
+	;mov	rsi,msg4
+	;call	[b_output]
+	;mov	rax,[nkey]
+	;;push	rbx
+	;call	_push
+	;call	_hex_dot
+	;pop	rbx
+	;pop	rsi
+
+	sub	qword [nkey],1
+	
+	jb	number4
+	lodsb
+	inc	qword [_in_value]	
+	cmp	al,20h
+	jne	number3
+	
+;rdx - number of symbols in word
+
+number4:
+	;normalize number
+	; rdx - count of dihits
+	sub		rdi,16
+	mov		rax,rdi
+	call	_push
+	ret
+
+number2:
+	
+	; empty string
+	mov	qword [rbx],6 ;dl
+	mov	qword [_in_value],0
+	ret
+;--------------------------
 
 align 32 , db 0cch
 
@@ -531,6 +607,7 @@ nfa_13:
 	db	4,"(0x)",0
 	align	8, db	0
 	dq	nfa_12
+_0x_:
 	dq	_0x
 	dq	0
 
@@ -547,9 +624,20 @@ nfa_15:
 	align	8, db	0
 	dq	nfa_14
 	dq	_addr_interp
+	dq	number_
+	dq	_0x_
 	dq	ret_
 	
 nfa_16:
+
+	db	12,"parse_number",0
+	align	8, db	0
+	dq	nfa_15
+number_:
+	dq	number
+	dq	0
+
+nfa_17:	
 	db	3,"pet",0
 	align	8, db	0
 	dq	nfa_15
@@ -560,7 +648,7 @@ nfa_16:
 nfa_last:
 	db	6,0,0
 	align	8, db 0
-	dq	nfa_16
+	dq	nfa_17
 ret_:
 	dq	_ret
 	dq	0
