@@ -297,35 +297,34 @@ msg6	db	' source string ',0
 ;search string from top of wordlist in wordlist
 
 _find:
-	mov	rsi,nfa_last ;[f64_list]
+	mov	rsi,[context_value]	
+	mov	rsi,[rsi]
 _find2:
 	movzx	rbx,byte [rsi]
 	inc	bl
-	and	bl,0f8h
-	mov	rdi,_here
+	and	bl,078h
+	mov	rdi,[here_value]
 	cmpsq
 	
 	je	_find1
 	add	rsi,rbx
 	mov	rsi,[rsi]
 
-%if tracefind = 1
-	push	rdi
-	push	rsi
-	mov	rax,rsi
-	call	_push
-	call	_hex_dot
-	pop	rsi
+	%if tracefind = 1
+			push	rdi
+			push	rsi
+			mov	rax,rsi
+			call	_push
+			call	_hex_dot
+			pop	rsi	
+			push	rsi
+			call	[b_output]
+			pop	rsi	
+			pop	rdi
+	%endif
 	
-	push	rsi
-	call	[b_output]
-	pop	rsi
-	
-	pop	rdi
-%endif	
 	test	rsi,rsi
 	jne	_find2
-	;mov	rax,_here
 	mov	rax,ret_
 	call	_push
 	xor	rax,rax
@@ -427,23 +426,9 @@ _skip_delimeters:
 	
 ;--------------------
 number:
-	
-	
 	xor	rdx,rdx
 	mov	rsi,rkey
 	add	rsi,[_in_value]
-	
-	;push	rsi
-	;mov	rsi,msg6
-	;call	[b_output]
-	;pop	rsi
-	;push	rsi
-	;call	[b_output]
-	;mov	rax,rsi
-	;call	_push
-	;call	_hex_dot
-	;pop	rsi
-
 	mov	rdi,[here_value]
 	mov	rbx,rdi
 	; fill 32 bytes with zeroes
@@ -466,26 +451,12 @@ number3:
 	; move to here +15
 	stosb
 	inc	rdx
-
-	;push	rsi
-	;mov	rsi,msg4
-	;call	[b_output]
-	;mov	rax,[nkey]
-	;;push	rbx
-	;call	_push
-	;call	_hex_dot
-	;pop	rbx
-	;pop	rsi
-
-	sub	qword [nkey],1
-	
+	sub	qword [nkey],1	
 	jb	number4
 	lodsb
 	inc	qword [_in_value]	
 	cmp	al,20h
 	jne	number3
-	
-;rdx - number of symbols in word
 
 number4:
 	;normalize number
@@ -502,6 +473,49 @@ number2:
 	mov	qword [_in_value],0
 	ret
 ;--------------------------
+nlink:	
+	call	_pop
+	mov		rsi,rax
+	call	nlink2
+	mov		rax,rsi
+	call	_push
+	ret
+	
+nlink2:
+	movzx	rbx,byte [rsi]
+	inc	bl
+	and	bl,078h
+	add	rsi,rbx
+	add	rsi,8
+	ret
+
+;--------------------------
+
+create_code:
+	call	_word
+	mov		rsi,[here_value]
+	call	nlink2
+	
+	
+	add ecx,10
+	add ecx,eax
+	mov [here_value],ecx ; ïåðåäâèíóëè õåðå
+	mov ebx,[current_value] ;ebx=f86list edx=here
+	mov edi,[ebx] ; nfa ïîñëåäíåãî ñëîâà
+	mov [ebx],edx ; ïåðåñòàíîâêà óêàçàòåëÿ èç ñïèñêà íà íîâîîïðåäåëåííîå ñëîâî
+	mov [ecx-8],edi ;lf
+	mov dword [ecx-4],_variable_code ; cf
+	call _pop
+	ret
+	bc0:
+	call _pop
+	ret
+;--------------------------------
+vocabulary_code:
+	mov		[context_value],rax
+	ret
+	
+;--------------------------------
 
 align 32 , db 0cch
 
@@ -514,7 +528,7 @@ align 16 , db 0aah
 	db 0 ; oa?ieie?o?ua-au?aaieaa?uea ioee
 	align 8 , db 0
 	dq 0 ;LFA
-	dq 0 ;CFA
+	dq vocabulary_code ;CFA
  f64_list:
 	dq nfa_last ;PFA - oeacaoaeu ia eoa iineaaiaai ii?aaaeaiiiai neiaa
 	dq 0 ; nnueea ia i?
@@ -559,6 +573,7 @@ nfa_7:
 	db	1,"@",0
 	align	8, db 0
 	dq	nfa_6
+fetch_:
 	dq	_fetch
 	dq	0	
 
@@ -567,6 +582,7 @@ nfa_8:
 	align	8, db 0
 	dq	nfa_7
 	dq	_variable_code
+context_value:	
 	dq	f64_list
 
 nfa_9:	
@@ -637,10 +653,43 @@ number_:
 	dq	number
 	dq	0
 
-nfa_17:	
+nfa_17:
+	db	7,"CURRENT",0
+	align	8, db 0
+	dq	nfa_16
+current_:
+	dq	_variable_code
+current_value:
+	dq	f64_list
+	
+nfa_18:
+	db	6,"CREATE",0
+	align	8, db 0
+	dq	nfa_17
+	dq	create_code
+	dq	0
+	
+nfa_19:	
+	db	6,"N>LINK",0
+	align	8, db 0
+	dq	nfa_18
+	dq	nlink
+	dq	0
+	
+nfa_20:
+	db	6,"LATEST",0
+	align	8, db	0
+	dq	nfa_19
+	dq	_addr_interp
+	dq	current_
+	dq	fetch_
+	dq	fetch_
+	dq	ret_
+	
+nfa_21:
 	db	3,"pet",0
 	align	8, db	0
-	dq	nfa_15
+	dq	nfa_20
 
 	dq	_constant
 	dq	test4
@@ -648,7 +697,7 @@ nfa_17:
 nfa_last:
 	db	6,0,0
 	align	8, db 0
-	dq	nfa_17
+	dq	nfa_21
 ret_:
 	dq	_ret
 	dq	0
