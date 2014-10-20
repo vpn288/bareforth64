@@ -213,7 +213,7 @@ _word:
 	;call	_hex_dot
 	;pop	rsi
 
-	mov	rdi,_here
+	mov	rdi,[here_value]
 	mov	rbx,rdi
 	; clear 32 bytes
 	xor	rax,rax
