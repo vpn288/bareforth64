@@ -497,6 +497,8 @@ create_code:
 	call	nlink2		;rsi - address of lf
 	call	latest_code2	;rax - latest
 	mov	[rsi],rax	;fill link field	
+	add	rsi,8
+	mov	qword [rsi],_variable_code
 	mov	rbx,[here_value]
 	mov	rax,[current_value]
 	mov	[rax],rbx	; here to latest
@@ -523,7 +525,7 @@ comma:
 	mov	rbx,[here_value]
 	call	_pop	
 	mov	[rbx],rax
-	add	[qword here_value],8
+	add	qword [here_value],8
 	ret
 ;--------------------------------
 
