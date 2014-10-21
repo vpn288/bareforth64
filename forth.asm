@@ -519,6 +519,13 @@ latest_code2:
 	mov	rax,[rax] ; rax = latest nfa of curent vocabulary
 	ret
 ;--------------------------------
+comma:
+	mov	rbx,[here_value]
+	call	_pop	
+	mov	[rbx],rax
+	add	[qword here_value],8
+	ret
+;--------------------------------
 
 align 32 , db 0cch
 
@@ -722,10 +729,17 @@ nfa_23:
 	dq	type_
 	dq	ret_
 	
+nfa_24:
+	db	1,",",0
+	align	8, db 0
+	dq	nfa_23
+	dq	comma
+	dq	0
+
 nfa_last:
 	db	6,0,0
 	align	8, db 0
-	dq	nfa_23
+	dq	nfa_24
 ret_:
 	dq	_ret
 	dq	0
