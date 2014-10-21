@@ -495,16 +495,13 @@ create_code:
 	call	_word
 	mov	rsi,[here_value]
 	call	nlink2		;rsi - address of lf
-	call	latest_code2
-	mov		[rsi],rax	;fill link field	
-	mov		rbx,[here_value]
-	mov		[rax],rbx	; here to latest
-	add		rsi,8
-	mov		[here_value],rsi
-	
-					;1) LATEST to LF
-					;2) _here to LATEST
-					;3) update HERE	
+	call	latest_code2	;rax - latest
+	mov	[rsi],rax	;fill link field	
+	mov	rbx,[here_value]
+	mov	rax,[current_value]
+	mov	[rax],rbx	; here to latest
+	add	rsi,8
+	mov	[here_value],rsi
 	ret
 ;--------------------------------
 vocabulary_code:
@@ -561,12 +558,14 @@ nfa_4:
 	db	4,"TYPE",0
 	align	8, db 0
 	dq	nfa_3
+type_:
 	dq	_type
 	dq	0
 nfa_5:
 	db	5,"COUNT",0
 	align	8, db 0
 	dq	nfa_4
+count_:
 	dq	_count
 	dq	0
 nfa_6:
@@ -679,6 +678,7 @@ nfa_19:
 	db	6,"N>LINK",0
 	align	8, db 0
 	dq	nfa_18
+nlink_:
 	dq	nlink
 	dq	0
 	
@@ -686,6 +686,7 @@ nfa_20:
 	db	6,"LATEST",0
 	align	8, db	0
 	dq	nfa_19
+latest_:
 	dq	latest_code
 	dq	0
 	
@@ -708,11 +709,23 @@ nfa_22:
 	dq	nfa_21
 	dq	_constant
 	dq	test4
+
+nfa_23:
+	db	4,"prev",0
+	align	8, db 0
+	dq	nfa_22
+	dq	_addr_interp
+	dq	latest_
+	dq	nlink_
+	dq	fetch_
+	dq	count_
+	dq	type_
+	dq	ret_
 	
 nfa_last:
 	db	6,0,0
 	align	8, db 0
-	dq	nfa_22
+	dq	nfa_23
 ret_:
 	dq	_ret
 	dq	0
