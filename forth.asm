@@ -495,9 +495,12 @@ create_code:
 	call	_word
 	mov	rsi,[here_value]
 	call	nlink2		;rsi - address of lf
-		
-	
-	mov	[here_value],rsi
+	call	latest_code2
+	mov		[rsi],rax	;fill link field	
+	mov		rbx,[here_value]
+	mov		[rax],rbx	; here to latest
+	add		rsi,8
+	mov		[here_value],rsi
 	
 					;1) LATEST to LF
 					;2) _here to LATEST
@@ -693,17 +696,23 @@ nfa_20:
 	;dq	ret_
 	
 nfa_21:
-	db	3,"pet",0
+	db	6,"CREATE",0
 	align	8, db	0
 	dq	nfa_20
-
+	dq	create_code
+	dq	0
+	
+nfa_22:	
+	db	3,"pet",0
+	align	8, db	0
+	dq	nfa_21
 	dq	_constant
 	dq	test4
 	
 nfa_last:
 	db	6,0,0
 	align	8, db 0
-	dq	nfa_21
+	dq	nfa_22
 ret_:
 	dq	_ret
 	dq	0
