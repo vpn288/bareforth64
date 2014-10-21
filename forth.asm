@@ -493,28 +493,31 @@ nlink2:
 
 create_code:
 	call	_word
-	mov		rsi,[here_value]
-	call	nlink2
+	mov	rsi,[here_value]
+	call	nlink2		;rsi - address of lf
+		
 	
+	mov	[here_value],rsi
 	
-	add ecx,10
-	add ecx,eax
-	mov [here_value],ecx ; ïåðåäâèíóëè õåðå
-	mov ebx,[current_value] ;ebx=f86list edx=here
-	mov edi,[ebx] ; nfa ïîñëåäíåãî ñëîâà
-	mov [ebx],edx ; ïåðåñòàíîâêà óêàçàòåëÿ èç ñïèñêà íà íîâîîïðåäåëåííîå ñëîâî
-	mov [ecx-8],edi ;lf
-	mov dword [ecx-4],_variable_code ; cf
-	call _pop
-	ret
-	bc0:
-	call _pop
+					;1) LATEST to LF
+					;2) _here to LATEST
+					;3) update HERE	
 	ret
 ;--------------------------------
 vocabulary_code:
 	mov		[context_value],rax
 	ret
 	
+;--------------------------------
+latest_code:
+	call	latest_code2
+	call	_push
+	ret
+
+latest_code2:
+	mov	rax,[current_value]
+	mov	rax,[rax] ; rax = latest nfa of curent vocabulary
+	ret
 ;--------------------------------
 
 align 32 , db 0cch
@@ -680,11 +683,14 @@ nfa_20:
 	db	6,"LATEST",0
 	align	8, db	0
 	dq	nfa_19
-	dq	_addr_interp
-	dq	current_
-	dq	fetch_
-	dq	fetch_
-	dq	ret_
+	dq	latest_code
+	dq	0
+	
+	;dq	_addr_interp
+	;dq	current_
+	;dq	fetch_
+	;dq	fetch_
+	;dq	ret_
 	
 nfa_21:
 	db	3,"pet",0
