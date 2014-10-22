@@ -48,8 +48,8 @@ data_stack_mask	dq	0x0fffff
 
 ;------------------------------
   _pop:
-        mov rax , [ r10 + r8 ]
-        sub r10 , 8
+    mov rax , [ r10 + r8 ]
+    sub r10 , 8
 	and r10 , r9
 	ret
 ;------------------------------	    
@@ -170,6 +170,13 @@ _fetch:
 	call _pop
 	mov rax,[rax]
 	call _push
+	ret
+;-------------------------
+_store:
+	call	_pop	; address
+	mov		rbx,rax
+	call	_pop	;data
+	mov		[rbx],rax
 	ret
 ;-------------------------
 _dup:
@@ -488,7 +495,14 @@ nlink2:
 	add	rsi,rbx
 	add	rsi,8
 	ret
-
+;--------------------------
+_name:
+	call	_pop
+	call	nlink2
+	;add		rsi,8
+	mov		rax,rsi
+	call	_push
+	ret
 ;--------------------------
 
 create_code:
@@ -738,10 +752,71 @@ nfa_24:
 	dq	comma
 	dq	0
 
+nfa_25:
+	db	1,"'",0
+	align	8, db 0
+	dq	nfa_24
+	dq	_addr_interp
+	dq	word_
+	dq	find_
+	dq	pop_
+	dq	ret_
+	
+nfa_26:
+	db	4,"WORD",0
+	align	8, db 0
+	dq	nfa_25
+word_:
+	dq	_word
+	dq	0
+
+nfa_27:
+	db	4,"FIND",0
+	align	8, db 0
+	dq	nfa_26
+find_:
+	dq	_find
+	dq	0
+
+nfa_28:
+	db	7,"EXECUTE",0
+	align	8, db 0
+	dq	nfa_27
+	dq	_execute_code
+	dq	0
+
+nfa_29:
+	db	10,"interpret#",0
+	align	8, db 0
+	dq	nfa_28
+	dq	_constant
+	dq	_addr_interp
+	
+nfa_30:
+	db	9,"constant#",0
+	align	8, db 0
+	dq	nfa_29
+	dq	_constant
+	dq	_constant
+	
+nfa_31:
+	db	5,"NAME>",0
+	align	8, db 0
+	dq	nfa_30
+	dq	_name
+	dq	0
+	
+nfa_32:	
+	db	1,"!",0
+	align	8, db 0
+	dq	nfa_31
+	dq	_store
+	dq	0
+
 nfa_last:
 	db	6,0,0
 	align	8, db 0
-	dq	nfa_24
+	dq	nfa_32
 ret_:
 	dq	_ret
 	dq	0
