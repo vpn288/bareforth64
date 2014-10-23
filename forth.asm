@@ -520,6 +520,19 @@ create_code:
 	mov	[here_value],rsi
 	ret
 ;--------------------------------
+_header:
+	call	_word
+	mov	rsi,[here_value]
+	call	nlink2		;rsi - address of lf
+	call	latest_code2	;rax - latest
+	mov	[rsi],rax	;fill link field
+	mov	rbx,[here_value]
+	mov	rax,[current_value]
+	mov	[rax],rbx	; here to latest
+	add	rsi,8
+	mov	[here_value],rsi
+	ret
+;--------------------------------
 vocabulary_code:
 	mov		[context_value],rax
 	ret
@@ -813,10 +826,24 @@ nfa_32:
 	dq	_store
 	dq	0
 
+nfa_33:
+	db	6,"HEADER",0
+	align	8, db 0
+	dq	nfa_32
+	dq	_header
+	dq	0
+
+nfa_34:
+	db	4,"ret#",0
+	align	8, db 0
+	dq	nfa_33
+	dq	_constant
+	dq	_ret
+
 nfa_last:
 	db	6,0,0
 	align	8, db 0
-	dq	nfa_32
+	dq	nfa_34
 ret_:
 	dq	_ret
 	dq	0
