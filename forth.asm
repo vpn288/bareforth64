@@ -568,11 +568,19 @@ test4:	db	'1234567890ABCDEF'
 rkey	times 64 db	0 
 nkey	dq	0
 align 16 , db 0aah
-  nfa_0:
+
+
+nfa_0:
+	db	6,0,0
+	align	8, db 0
+	dq	0
+ret_:
+	dq	_ret
+	
 	db 7, "FORTH64" ; neiaa?u aey neia ?aaeuiiai, ae?ooaeuiiai 86
 	db 0 ; oa?ieie?o?ua-au?aaieaa?uea ioee
 	align 8 , db 0
-	dq 0 ;LFA
+	dq nfa_0 ;LFA
 	dq vocabulary_code ;CFA
  f64_list:
 	dq nfa_last ;PFA - oeacaoaeu ia eoa iineaaiaai ii?aaaeaiiiai neiaa
@@ -742,8 +750,12 @@ nfa_21:
 	db	6,"CREATE",0
 	align	8, db	0
 	dq	nfa_20
-	dq	create_code
-	dq	0
+create_:
+	dq	_addr_interp
+	dq	header_
+	dq	variable#_
+	dq	comma_
+	dq	ret_
 	
 nfa_22:	
 	db	3,"pet",0
@@ -768,6 +780,7 @@ nfa_24:
 	db	1,",",0
 	align	8, db 0
 	dq	nfa_23
+comma_:
 	dq	comma
 	dq	0
 
@@ -836,8 +849,10 @@ nfa_33:
 	db	6,"HEADER",0
 	align	8, db 0
 	dq	nfa_32
+header_:
 	dq	_header
 	dq	0
+	
 
 nfa_34:
 	db	4,"ret#",0
@@ -845,12 +860,34 @@ nfa_34:
 	dq	nfa_33
 	dq	_constant
 	dq	_ret
+	
 
-nfa_last:
-	db	6,0,0
+nfa_35:
+	db	9,"variable#",0
 	align	8, db 0
 	dq	nfa_34
-ret_:
-	dq	_ret
+variable#_:
+	dq	_constant
+	dq	_variable_code
+
+nfa_36:
+	db	8,"VARIABLE",0
+	align	8, db 0
+	dq	nfa_35
+	dq	_addr_interp
+	dq	create_
+	dq	zero_
+	dq	comma_
+	dq	ret_
+nfa_last:	
+nfa_37:
+	db	1,"0",0
+	align	8, db 0
+	dq	nfa_36
+zero_:
+	dq	_constant
 	dq	0
+	
 _here:
+
+
