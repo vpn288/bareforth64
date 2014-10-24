@@ -8,6 +8,11 @@
 	xor	r10, r10
 	mov	r9,[data_stack_mask]
 	
+	mov	rsi,filename
+	call	[b_file_open]
+	mov	[fid],rax
+	call	_push
+	call	_hex_dot
 	call	_cr
 	mov	rax,nfa_0
 	call	_push
@@ -41,7 +46,8 @@ _f_system:
 	jmp	_f_system
 	
 	ret	
-
+filename db	'forth.blk',0
+fid	dq	0
 msgf	db	'forth>',0 
 data_stack_base	dq	0x300000
 data_stack_mask	dq	0x0fffff
