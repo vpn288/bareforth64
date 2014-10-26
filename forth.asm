@@ -23,10 +23,8 @@
 _f_system:
 	call	_cr
 	mov	qword [_in_value],0
-	rdtsc
-	shl	rax,32
-	shrd	rax,rdx,32
-	call	_push
+	call	_timer
+	
 	call	_hex_dot
 	mov	rsi,msgf
 	
@@ -65,6 +63,13 @@ data_stack_mask	dq	0x0fffff
         mov [ r10 + r8 ] , rax
         ret
 ;--------------------------------
+_timer:	
+	rdtsc
+	shl	rax,32
+	shrd	rax,rdx,32
+	call	_push
+	ret
+;--------------------------------	
 _hex_dot:
 	call	_pop
         mov     [value],rax
@@ -438,7 +443,7 @@ _skip_delimeters:
 	
 	
 ;--------------------
-number:
+_number:
 	xor	rdx,rdx
 	mov	rsi,rkey
 	add	rsi,[_in_value]
@@ -486,7 +491,7 @@ number2:
 	mov	qword [_in_value],0
 	ret
 ;--------------------------
-nlink:	
+_nlink:	
 	call	_pop
 	mov		rsi,rax
 	call	nlink2
@@ -511,7 +516,7 @@ _name:
 	ret
 ;--------------------------
 
-create_code:
+_create:
 	call	_word
 	mov	rsi,[here_value]
 	call	nlink2		;rsi - address of lf
@@ -539,12 +544,13 @@ _header:
 	mov	[here_value],rsi
 	ret
 ;--------------------------------
-vocabulary_code:
+_vocabulary:
+	add		rax,8
 	mov		[context_value],rax
 	ret
 	
 ;--------------------------------
-latest_code:
+_latest:
 	call	latest_code2
 	call	_push
 	ret
@@ -554,11 +560,36 @@ latest_code2:
 	mov	rax,[rax] ; rax = latest nfa of curent vocabulary
 	ret
 ;--------------------------------
-comma:
+_comma:
 	mov	rbx,[here_value]
 	call	_pop	
 	mov	[rbx],rax
 	add	qword [here_value],8
+	ret
+;--------------------------------
+_vocabulary_create:
+	call	_header
+	mov	rsi,[here_value]
+	mov		rax,rsi
+	
+	mov	qword [rsi],_vocabulary
+	add	rsi,8
+	mov	[rsi],rsi	;link to empty word, which is last in this list
+	
+	; set zero word 
+	mov	qword [rsi],6
+	add	rsi,8
+	xor	rax,rax
+	mov	[rsi],rax
+	
+	add	rsi,8
+	mov	qword [rsi],ret_
+	add	rsi,8
+	mov	[here_value],rsi
+		
+	mov		rax,rsi
+	call	_push
+	call	_hex_dot
 	ret
 ;--------------------------------
 
@@ -571,25 +602,24 @@ align 16 , db 0aah
 
 
 nfa_0:
-	db	6,0,0
-	align	8, db 0
-	dq	0
-ret_:
-	dq	_ret
-	
 	db 7, "FORTH64" ; neiaa?u aey neia ?aaeuiiai, ae?ooaeuiiai 86
 	db 0 ; oa?ieie?o?ua-au?aaieaa?uea ioee
 	align 8 , db 0
-	dq nfa_0 ;LFA
-	dq vocabulary_code ;CFA
+	dq  0 ;LFA
+	dq _vocabulary ;CFA
  f64_list:
 	dq nfa_last ;PFA - oeacaoaeu ia eoa iineaaiaai ii?aaaeaiiiai neiaa
-	dq 0 ; nnueea ia i?
+nfa_0.5:
+	db	6,0,0
+	align	8, db 0
+	dq	nfa_0
+ret_:
+	dq	_ret
 
 nfa_1:
 	db	4,"HEX." ,0
 	align	8 , db 0
-	dq	nfa_0 
+	dq	nfa_0.5 
 	dq	_hex_dot
 	dq	0
 nfa_2:
@@ -705,7 +735,7 @@ nfa_16:
 	align	8, db	0
 	dq	nfa_15
 number_:
-	dq	number
+	dq	_number
 	dq	0
 
 nfa_17:
@@ -721,7 +751,7 @@ nfa_18:
 	db	6,"CREATE",0
 	align	8, db 0
 	dq	nfa_17
-	dq	create_code
+	dq	_create
 	dq	0
 	
 nfa_19:	
@@ -729,7 +759,7 @@ nfa_19:
 	align	8, db 0
 	dq	nfa_18
 nlink_:
-	dq	nlink
+	dq	_nlink
 	dq	0
 	
 nfa_20:
@@ -737,7 +767,7 @@ nfa_20:
 	align	8, db	0
 	dq	nfa_19
 latest_:
-	dq	latest_code
+	dq	_latest
 	dq	0
 	
 	;dq	_addr_interp
@@ -781,7 +811,7 @@ nfa_24:
 	align	8, db 0
 	dq	nfa_23
 comma_:
-	dq	comma
+	dq	_comma
 	dq	0
 
 nfa_25:
@@ -828,6 +858,7 @@ nfa_30:
 	db	9,"constant#",0
 	align	8, db 0
 	dq	nfa_29
+constant#_:
 	dq	_constant
 	dq	_constant
 	
@@ -879,7 +910,7 @@ nfa_36:
 	dq	zero_
 	dq	comma_
 	dq	ret_
-nfa_last:	
+
 nfa_37:
 	db	1,"0",0
 	align	8, db 0
@@ -888,6 +919,35 @@ zero_:
 	dq	_constant
 	dq	0
 	
+nfa_38:
+	db 8,"CONSTANT",0
+	align	8, db 0
+	dq	nfa_37
+	dq	_addr_interp
+	dq	header_
+	dq	constant#_
+	dq	comma_
+	dq	comma_
+	dq	ret_
+	
+nfa_39:
+	db	10,"VOCABULARY",0
+	align	8, db 0
+	dq	nfa_38
+	dq	_vocabulary_create
+	dq	0
+nfa_last:
+	
+nfa_40:
+	db	6,"TIMER@",0
+	align	8, db 0
+	dq	nfa_39
+timer_:
+	dq	_timer
+	dq	0
 _here:
 
+	db	6,0,0
+	
+	dq	nfa_34
 
