@@ -546,7 +546,9 @@ _header:
 ;--------------------------------
 _vocabulary:
 	add		rax,8
-	mov		[context_value],rax
+	mov		[context_value],rax ;[current_value],rax;
+	call	_push
+	call	_hex_dot
 	ret
 	
 ;--------------------------------
@@ -575,7 +577,7 @@ _vocabulary_create:
 	mov	qword [rsi],_vocabulary
 	add	rsi,8
 	mov	[rsi],rsi	;link to empty word, which is last in this list
-	
+	add	rsi,8
 	; set zero word 
 	mov	qword [rsi],6
 	add	rsi,8
@@ -583,7 +585,7 @@ _vocabulary_create:
 	mov	[rsi],rax
 	
 	add	rsi,8
-	mov	qword [rsi],ret_
+	mov	qword [rsi],_ret
 	add	rsi,8
 	mov	[here_value],rsi
 		
@@ -592,7 +594,25 @@ _vocabulary_create:
 	call	_hex_dot
 	ret
 ;--------------------------------
-
+_cellp:
+	add	qword [r10 + r8],8
+	ret
+;--------------------------------
+_dump:
+	call	_pop
+	mov		rdx,rax
+	mov		rcx,16
+_dump2:
+	push	rcx
+	mov		rax,[rdx]
+	call	_push
+	call	_hex_dot
+	call	_space
+	add		rdx,8
+	pop		rcx
+	loop	_dump2
+	ret
+;--------------------------------
 align 32 , db 0cch
 
 test4:	db	'1234567890ABCDEF'
@@ -936,7 +956,6 @@ nfa_39:
 	dq	nfa_38
 	dq	_vocabulary_create
 	dq	0
-nfa_last:
 	
 nfa_40:
 	db	6,"TIMER@",0
@@ -944,6 +963,22 @@ nfa_40:
 	dq	nfa_39
 timer_:
 	dq	_timer
+	dq	0
+
+nfa_41:
+	db	5,"CELL+",0
+	align	8, db 0
+	dq	nfa_40
+cellp_:
+	dq	_cellp
+	dq	0
+nfa_last:
+nfa_42:
+	db	4,"DUMP",0
+	align	8, db 0
+	dq	nfa_41
+dump_:
+	dq	_dump
 	dq	0
 _here:
 
