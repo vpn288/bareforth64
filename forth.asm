@@ -3,6 +3,7 @@
 
 %INCLUDE "bmdev.asm"
  tracefind equ 0
+ tracefind2 equ 0
   start:
 	mov	r8,[data_stack_base]
 	xor	r10, r10
@@ -330,11 +331,13 @@ _find2:
 
 	%if tracefind = 1
 			push	rdi
+			%if tracefind2=2
 			push	rsi
 			mov	rax,rsi
 			call	_push
 			call	_hex_dot
-			pop	rsi	
+			pop	rsi
+				%endif
 			push	rsi
 			call	[b_output]
 			pop	rsi	
@@ -546,9 +549,9 @@ _header:
 ;--------------------------------
 _vocabulary:
 	add		rax,8
-	mov		[context_value],rax ;[current_value],rax;
+;	mov		[context_value],rax ;[current_value],rax;
 	call	_push
-	call	_hex_dot
+;	call	_hex_dot
 	ret
 	
 ;--------------------------------
@@ -910,7 +913,7 @@ nfa_34:
 	align	8, db 0
 	dq	nfa_33
 	dq	_constant
-	dq	_ret
+	dq	ret_
 	
 
 nfa_35:
