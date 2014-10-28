@@ -578,9 +578,8 @@ _vocabulary_create:
 	mov		rax,rsi
 	
 	mov	qword [rsi],_vocabulary
-	add	rsi,8
-	mov	[rsi],rsi	;link to empty word, which is last in this list
-	add	rsi,8
+	add	rsi,16
+	mov	[rsi-8],rsi	;link to empty word, which is last in this list
 	; set zero word 
 	mov	qword [rsi],6
 	add	rsi,8
