@@ -691,12 +691,12 @@ nfa_8:
 	dq	_variable_code
 context_value:	
 	dq	f64_list
-	dq	0
-	dq	0
-	dq	0
-	dq	0
-	dq	0
-	dq	0
+	dq	-1
+	dq	-1
+	dq	-1
+	dq	-1
+	dq	-1
+	dq	-1
 	dq	0
 
 nfa_9:	
