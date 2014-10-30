@@ -199,7 +199,9 @@ _dup:
 _interpret:
 	;call	_bl
 	call	_word
-	call	_find
+	mov		rax,context_value
+	call	_push
+	call	_find_task_frame
 	call	_pop
 	;call	_hex_dot
 	;call	_dup	
@@ -336,7 +338,28 @@ _find_task3:
 	call	_push		
 _find_task2:
 	ret
-
+	
+_find_task_frame:
+	call	_pop	;address of context frame
+	push	rax
+ftf1:
+	pop		rax
+	add		rax,8
+	mov		rsi,[rax-8]
+	test	rsi,rsi
+	je		ftf		; last slot - zero
+	inc		rsi
+	je		ftf1
+	dec		rsi	
+	push	rax
+	call	_sfind2
+	call	_pop
+	test	rax,rax
+	je		ftf1		;nothing found
+	call	_push
+	pop		rax	
+ftf:
+	ret
 
 _find:
 	mov	rax,[context_value]
@@ -723,7 +746,15 @@ nfa_8:
 	dq	_variable_code
 context_value:	
 	dq	f64_list
-
+	dq	-1
+	dq	-1
+	dq	-1
+	dq	-1
+	dq	-1
+	dq	-1
+	dq	0
+	
+	
 nfa_9:	
 	db	3,">IN",0
 	align	8, db 0
@@ -944,7 +975,7 @@ nfa_34:
 	align	8, db 0
 	dq	nfa_33
 	dq	_constant
-	dq	_ret
+	dq	ret_
 	
 
 nfa_35:
