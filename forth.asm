@@ -3,7 +3,6 @@
 
 %INCLUDE "bmdev.asm"
  tracefind equ 0
- tracefind2 equ 0
   start:
 	mov	r8,[data_stack_base]
 	xor	r10, r10
@@ -314,9 +313,43 @@ msg5	db	' skips ',0
 msg6	db	' source string ',0
 ;-------------------------------
 ;search string from top of wordlist in wordlist
+_find_task:
+	call	_pop
+	test	rax,rax
+	je	_find_task2 ; end of task
+	inc	rax
+	je	_find_task	; empty slot
+	dec	rax
+	mov	rsi,rax
+	call	_sfind2
+	call	_pop
+	mov	rbx,rax
+	call	_pop
+	mov	rcx,rax
+_find_task3:
+	call	_pop
+	test	rax,rax
+	jne	_find_task3
+	mov	rax,rcx
+	call	_push
+	mov	rax,rbx
+	call	_push		
+_find_task2:
+	ret
+
 
 _find:
-	mov	rsi,[context_value]	
+	mov	rax,[context_value]
+	call	_push
+
+_sfind:
+	call	_pop
+	mov	rsi,rax
+	call	_sfind2
+	ret
+
+_sfind2:
+	;mov	rsi,[context_value]	
 	mov	rsi,[rsi]
 _find2:
 	movzx	rbx,byte [rsi]
@@ -331,13 +364,11 @@ _find2:
 
 	%if tracefind = 1
 			push	rdi
-			%if tracefind2=2
 			push	rsi
 			mov	rax,rsi
 			call	_push
 			call	_hex_dot
-			pop	rsi
-				%endif
+			pop	rsi	
 			push	rsi
 			call	[b_output]
 			pop	rsi	
@@ -350,7 +381,7 @@ _find2:
 	call	_push
 	xor	rax,rax
 	call	_push
-	ret
+	ret			; nothing to find
 	
 _find1:
 	add	rsi,rbx
@@ -359,7 +390,7 @@ _find1:
 	call	_push
 	xor	rax,rax
 	dec	rax
-	call	_push
+	call	_push		; word found
 	ret
 ;-------------------
 _ret:
@@ -549,9 +580,9 @@ _header:
 ;--------------------------------
 _vocabulary:
 	add		rax,8
-;	mov		[context_value],rax ;[current_value],rax;
+	;mov		[context_value],rax ;[current_value],rax;
 	call	_push
-;	call	_hex_dot
+	;call	_hex_dot
 	ret
 	
 ;--------------------------------
@@ -580,6 +611,7 @@ _vocabulary_create:
 	mov	qword [rsi],_vocabulary
 	add	rsi,16
 	mov	[rsi-8],rsi	;link to empty word, which is last in this list
+	;add	rsi,8
 	; set zero word 
 	mov	qword [rsi],6
 	add	rsi,8
@@ -691,13 +723,6 @@ nfa_8:
 	dq	_variable_code
 context_value:	
 	dq	f64_list
-	dq	-1
-	dq	-1
-	dq	-1
-	dq	-1
-	dq	-1
-	dq	-1
-	dq	0
 
 nfa_9:	
 	db	3,">IN",0
@@ -919,7 +944,7 @@ nfa_34:
 	align	8, db 0
 	dq	nfa_33
 	dq	_constant
-	dq	ret_
+	dq	_ret
 	
 
 nfa_35:
@@ -981,13 +1006,20 @@ nfa_41:
 cellp_:
 	dq	_cellp
 	dq	0
-nfa_last:
+
 nfa_42:
 	db	4,"DUMP",0
 	align	8, db 0
 	dq	nfa_41
 dump_:
 	dq	_dump
+	dq	0
+nfa_last:
+nfa_43:
+	db	6,"(FIND)",0
+	align	8, db 0
+	dq	nfa_42
+	dq	_sfind
 	dq	0
 _here:
 
