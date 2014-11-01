@@ -198,6 +198,10 @@ _dup:
 ;-------------------------
 _interpret:
 	;call	_bl
+	mov	rax,rkey
+	call	_push
+	mov	rax,[here_value]
+	call	_push
 	call	_word
 	mov		rax,context_value
 	call	_push
@@ -216,10 +220,13 @@ _bl:
 ;get string from input buffer parse it and put to top of wordlist
 
 _word:
-	
+	call	_pop	;	to address
+	mov		rdi,rax
+	call	_pop	; from address
+	mov		rsi,rax
 	
 	xor	rdx,rdx
-	mov	rsi,rkey
+	;mov	rsi,rkey
 	add	rsi,[_in_value]
 	
 	;push	rsi
@@ -233,7 +240,7 @@ _word:
 	;call	_hex_dot
 	;pop	rsi
 
-	mov	rdi,[here_value]
+	;mov	rdi,[here_value]
 	mov	rbx,rdi
 	; clear 32 bytes
 	xor	rax,rax
