@@ -167,7 +167,7 @@ _count:
 	ret
 ;-------------------------
 _variable_code:
-	add	rax,8
+	add		rax,8
 	call 	_push
 	ret
 ;-------------------------
@@ -677,6 +677,23 @@ _dump2:
 	loop	_dump2
 	ret
 ;--------------------------------
+_rdblock:
+	call	_pop	; block number
+	mov		rcx,rax
+	inc		rcx
+	shl		rcx,13
+	call	_pop	; buffer
+	mov		rdi,rax
+	mov		rax,[fid]
+	call	[b_file_read]
+	
+	ret
+;--------------------------------
+_allot:
+	call	_pop
+	add		[here_value],rax
+	ret
+;--------------------------------
 align 32 , db 0cch
 
 test4:	db	'1234567890ABCDEF'
@@ -1052,13 +1069,36 @@ nfa_42:
 dump_:
 	dq	_dump
 	dq	0
-nfa_last:
+
 nfa_43:
 	db	6,"(FIND)",0
 	align	8, db 0
 	dq	nfa_42
 	dq	_sfind
 	dq	0
+	
+nfa_44:
+	db	6,"BUFFER",0
+	align	8, db 0
+	dq	nfa_43
+	dq	_variable_code
+;	times	8192	db	20h
+	dq	0
+	
+nfa_45:
+	db	7,"rdblock",0
+	align	8, db 0
+	dq	nfa_43
+	dq	_rdblock
+	dq	0
+nfa_last:	
+nfa_46:
+	db	5,"ALLOT",0
+	align	8, db 0
+	dq	nfa_45
+	dq	_allot
+	dq	0
+
 _here:
 
 	db	6,0,0
