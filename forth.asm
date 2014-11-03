@@ -198,19 +198,16 @@ _dup:
 ;-------------------------
 _interpret:
 	;call	_bl
-	mov	rax,rkey
-	call	_push
-	mov	rax,[here_value]
-	call	_push
+	
 	call	_word
 	mov		rax,context_value
 	call	_push
 	call	_find_task_frame
 	call	_pop
-	;call	_hex_dot
-	;call	_dup	
-	;call	_hex_dot	
-	call	_execute_code
+		
+		call	_dup	
+		call	_hex_dot	
+		call	_execute_code
 	jmp	_interpret
 
 _bl:
@@ -218,8 +215,27 @@ _bl:
 
 ;-------------------------
 ;get string from input buffer parse it and put to top of wordlist
-
 _word:
+	mov		rax,[block_value]
+	test	rax,rax
+	jne		_word5
+	;block 0 terminal input
+	mov		rax,rkey
+	call	_push
+	mov		rax,[here_value]
+	call	_push
+	call	_enclose
+	ret
+_word5:
+	; any block set to buffer
+	mov		rax,[buffer_value]
+	call	_push
+	mov		rax,[here_value]
+	call	_push
+	call	_enclose
+	ret
+
+_enclose:
 	call	_pop	;	to address
 	mov		rdi,rax
 	call	_pop	; from address
@@ -363,9 +379,13 @@ ftf1:
 	call	_pop
 	test	rax,rax
 	je		ftf1		;nothing found
+
 	call	_push
 	pop		rax	
+	ret
 ftf:
+	call	_push
+	pop		rax
 	ret
 
 _find:
@@ -770,7 +790,7 @@ nfa_8:
 	dq	_variable_code
 context_value:	
 	dq	f64_list
-	dq	-1
+	dq	0
 	dq	-1
 	dq	-1
 	dq	-1
@@ -897,11 +917,12 @@ create_:
 	dq	ret_
 	
 nfa_22:	
-	db	3,"pet",0
+	db	5,"BLOCK",0
 	align	8, db	0
 	dq	nfa_21
-	dq	_constant
-	dq	test4
+	dq	_variable_code
+block_value:
+	dq	0
 
 nfa_23:
 	db	4,"prev",0
@@ -1078,17 +1099,17 @@ nfa_43:
 	dq	0
 	
 nfa_44:
-	db	6,"BUFFER",0
+	db	6,"bufadr",0
 	align	8, db 0
 	dq	nfa_43
 	dq	_variable_code
-;	times	8192	db	20h
-	dq	0
+buffer_value:	
+	dq	_here
 	
 nfa_45:
 	db	7,"rdblock",0
 	align	8, db 0
-	dq	nfa_43
+	dq	nfa_44
 	dq	_rdblock
 	dq	0
 nfa_last:	
