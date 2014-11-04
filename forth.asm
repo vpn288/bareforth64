@@ -31,11 +31,7 @@ _f_system:
 	call	[b_output]
 	;call	_cr
 
-	mov	rdi, rkey
-	mov	rcx,64
-	
-	call	[b_input]
-	mov	[nkey],rcx
+	call	_expect
 	;mov	rax,rcx
 	;call	_push
 	;call	_hex_dot
@@ -205,9 +201,9 @@ _interpret:
 	call	_find_task_frame
 	call	_pop
 		
-		call	_dup	
-		call	_hex_dot	
-		call	_execute_code
+		;call	_dup	
+		;call	_hex_dot	
+	call	_execute_code
 	jmp	_interpret
 
 _bl:
@@ -216,25 +212,16 @@ _bl:
 ;-------------------------
 ;get string from input buffer parse it and put to top of wordlist
 _word:
-	mov		rax,[block_value]
-	test	rax,rax
-	jne		_word5
-	;block 0 terminal input
-	mov		rax,rkey
-	call	_push
-	mov		rax,[here_value]
-	call	_push
-	call	_enclose
-	ret
-_word5:
-	; any block set to buffer
-	mov		rax,[buffer_value]
+	mov		rax,[block_value+8]
+	mov		[nkey],rax
+	mov		rax,[block_value+16]
 	call	_push
 	mov		rax,[here_value]
 	call	_push
 	call	_enclose
 	ret
 
+;--------------------------------
 _enclose:
 	call	_pop	;	to address
 	mov		rdi,rax
@@ -242,7 +229,6 @@ _enclose:
 	mov		rsi,rax
 	
 	xor	rdx,rdx
-	;mov	rsi,rkey
 	add	rsi,[_in_value]
 	
 	;push	rsi
@@ -274,20 +260,8 @@ _enclose:
 _word3:
 	
 	stosb
-	inc	rdx
-
-	;push	rsi
-	;mov	rsi,msg4
-	;call	[b_output]
-	;mov	rax,[nkey]
-	;;push	rbx
-	;call	_push
-	;call	_hex_dot
-	;pop	rbx
-	;pop	rsi
-
-	sub	qword [nkey],1
-	
+	inc	rdx	
+	sub	qword [nkey],1	
 	jb	_word4
 	lodsb
 	inc	qword [_in_value]	
@@ -296,28 +270,23 @@ _word3:
 	
 
 _word4:
-	;dec	rsi
-	;mov	r11,rsi
+	
 	; string to validate
 	mov	[rbx],dl
-	;sub	rsi,rkey
-	;mov	r11,rsi
-	;add	[_in_value],rsi
-	;dec	qword [_in_value]
-	;mov	rax,r11
+
 	
-	;push	rbx
-	;call	_push
-	;call	_hex_dot
-	;pop	rbx
-	;mov	rsi,msg2
-	;call	[b_output]
-	;mov	rsi,rbx
-	;call	[b_output]
-	;mov	rax,[rbx]
-	;call	_push
-	;call	_hex_dot
-	;call	_cr
+	push	rbx
+	call	_push
+	call	_hex_dot
+	pop	rbx
+	mov	rsi,msg2
+	call	[b_output]
+	mov	rsi,rbx
+	call	[b_output]
+	mov	rax,[rbx]
+	call	_push
+	call	_hex_dot
+	call	_cr
 	ret
 
 _word2:
@@ -714,6 +683,13 @@ _allot:
 	add		[here_value],rax
 	ret
 ;--------------------------------
+_expect:
+	mov	rdi,tib#
+	mov	rcx,[tib#-8]
+	call	[b_input]
+	mov		qword [nkey],rcx
+	ret
+;--------------------------------
 align 32 , db 0cch
 
 test4:	db	'1234567890ABCDEF'
@@ -920,9 +896,12 @@ nfa_22:
 	db	5,"BLOCK",0
 	align	8, db	0
 	dq	nfa_21
+block_:
 	dq	_variable_code
 block_value:
-	dq	0
+	dq	0		;block number
+	dq	64		;size of buffer
+	dq	tib#	;address of input buffer
 
 nfa_23:
 	db	4,"prev",0
@@ -1112,14 +1091,23 @@ nfa_45:
 	dq	nfa_44
 	dq	_rdblock
 	dq	0
-nfa_last:	
+	
 nfa_46:
 	db	5,"ALLOT",0
 	align	8, db 0
 	dq	nfa_45
 	dq	_allot
 	dq	0
-
+nfa_last:
+nfa_47:
+	db	3,"TIB",0
+	align	8, db 0
+	dq	nfa_46
+	dq	_variable_code
+	dq	63	;tibsize
+tib#:
+	times	64	db	20h
+	dq	0606060606060606h
 _here:
 
 	db	6,0,0
