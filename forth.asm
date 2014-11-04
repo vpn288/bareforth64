@@ -248,6 +248,7 @@ _enclose:
 	xor	rax,rax
 	mov	rcx,4
 	rep	stosq
+	
 	mov	rdi,rbx
 	mov	rcx,[nkey]
 	cmp	rcx,rdx
@@ -266,7 +267,7 @@ _word3:
 	lodsb
 	inc	qword [_in_value]	
 	cmp	al,20h
-	jne	_word3
+	jnbe	_word3
 	
 
 _word4:
@@ -275,10 +276,11 @@ _word4:
 	mov	[rbx],dl
 
 	
-	push	rbx
-	call	_push
-	call	_hex_dot
-	pop	rbx
+	;push	rbx
+	;
+	;call	_push
+	;call	_hex_dot
+	;pop	rbx
 	mov	rsi,msg2
 	call	[b_output]
 	mov	rsi,rbx
@@ -485,13 +487,21 @@ _skip_delimeters:
 	;mov	rsi,msg5
 	;call	[b_output]
 	;pop	rsi
-	
+	;push	rsi
+	;push	rax
+	;push	rdi
+	;mov		rax,[nkey]
+	;call	_push
+	;call	_hex_dot
+	;pop		rdi
+	;pop		rax
+	;pop		rsi
 	sub	qword [nkey],1
 	jb	_word2
 	lodsb
 	inc	qword [_in_value]
 	cmp	al,20h
-	je	_skip_delimeters
+	jbe	_skip_delimeters
 	ret
 	
 	
@@ -687,7 +697,11 @@ _expect:
 	mov	rdi,tib#
 	mov	rcx,[tib#-8]
 	call	[b_input]
+	;dec		rcx
 	mov		qword [nkey],rcx
+	mov		rax,rcx
+	call	_push
+	call	_hex_dot
 	ret
 ;--------------------------------
 align 32 , db 0cch
