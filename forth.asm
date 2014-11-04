@@ -281,14 +281,14 @@ _word4:
 	;call	_push
 	;call	_hex_dot
 	;pop	rbx
-	mov	rsi,msg2
-	call	[b_output]
-	mov	rsi,rbx
-	call	[b_output]
-	mov	rax,[rbx]
-	call	_push
-	call	_hex_dot
-	call	_cr
+	;mov	rsi,msg2
+	;call	[b_output]
+	;mov	rsi,rbx
+	;call	[b_output]
+	;mov	rax,[rbx]
+	;call	_push
+	;call	_hex_dot
+	;call	_cr
 	ret
 
 _word2:
@@ -507,8 +507,10 @@ _skip_delimeters:
 	
 ;--------------------
 _number:
-	xor	rdx,rdx
-	mov	rsi,rkey
+	mov		rax,[block_value+8]
+	mov		[nkey],rax
+	mov		rsi,[block_value+16]	
+	xor	rdx,rdx	
 	add	rsi,[_in_value]
 	mov	rdi,[here_value]
 	mov	rbx,rdi
@@ -699,9 +701,9 @@ _expect:
 	call	[b_input]
 	;dec		rcx
 	mov		qword [nkey],rcx
-	mov		rax,rcx
-	call	_push
-	call	_hex_dot
+	;mov		rax,rcx
+	;call	_push
+	;call	_hex_dot
 	ret
 ;--------------------------------
 align 32 , db 0cch
