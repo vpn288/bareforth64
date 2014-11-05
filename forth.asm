@@ -663,6 +663,11 @@ _cellp:
 	add	qword [r10 + r8],8
 	ret
 ;--------------------------------
+_cellm:
+	sub	qword [r10 + r8],8
+	ret
+;--------------------------------
+
 _dump:
 	call	_pop
 	mov		rdx,rax
@@ -1094,12 +1099,11 @@ nfa_43:
 	dq	0
 	
 nfa_44:
-	db	6,"bufadr",0
+	db	5,"CELL-",0
 	align	8, db 0
 	dq	nfa_43
-	dq	_variable_code
-buffer_value:	
-	dq	_here
+	dq	_cellm	
+	dq	0
 	
 nfa_45:
 	db	7,"rdblock",0
