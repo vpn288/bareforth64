@@ -278,19 +278,6 @@ _enclose:
 	
 	xor	rdx,rdx
 	add	rsi,[_in_value]
-	
-	;push	rsi
-	;mov	rsi,msg6
-	;call	os_output
-	;pop	rsi
-	;push	rsi
-	;call	os_output
-	;mov	rax,rsi
-	;call	_push
-	;call	_hex_dot
-	;pop	rsi
-
-	;mov	rdi,[here_value]
 	mov	rbx,rdi
 	; clear 32 bytes
 	xor	rax,rax
@@ -322,23 +309,6 @@ _word4:
 	
 	; string to validate
 	mov	[rbx],dl
-
-	
-	;push	rbx
-	;
-	;call	_push
-	;call	_hex_dot
-	;pop	rbx
-	;mov	rsi,msg2
-	;call	os_output
-	;mov	rsi,rbx
-	;call	os_output
-;	mov	r14,0x23456789
-;call	_break
-	;mov	rax,[rbx]
-	;call	_push
-	;call	_hex_dot
-	;call	_cr
 	ret
 
 _word2:
@@ -348,17 +318,16 @@ _word2:
 	;call	os_output
 	mov	qword [rbx],6 ;dl
 	mov	qword [_in_value],0
-	;mov	r14,0x12345678
-;call	_break
+	
 	;mov	rax,[_in_value]
 	
 	ret
 
-msg2	db	' String prepared to find:',0
-msg7	db	' empty string ',0
-msg8	db	' push symbol ',0
-msg5	db	' skips ',0
-msg6	db	' source string ',0
+;msg2	db	' String prepared to find:',0
+;msg7	db	' empty string ',0
+;msg8	db	' push symbol ',0
+;msg5	db	' skips ',0
+;msg6	db	' source string ',0
 ;-------------------------------
 ;search string from top of wordlist in wordlist
 _find_task:
@@ -389,22 +358,9 @@ _find_task_frame:
 	call	_pop	;address of context frame
 	push	rax
 ftf1:
-mov	byte [0xb8156],"N"
 	pop		rax
 	add		rax,8
 	mov		rsi,[rax-8]
-	;mov	r14,0x456
-	;call	_break
-	;push	rax
-	;push	rsi
-	;mov		rax,rsi
-	;call	_cr
-	;call	_push
-	;call	_hex_dot
-	;call	_cr
-	;pop		rax
-	;pop		rsi
-	;int 3
 	test	rsi,rsi
 	je		ftf		; last slot - zero
 	inc		rsi
@@ -422,9 +378,6 @@ mov	byte [0xb8158],"Q"
 	pop		rax	
 	ret
 ftf:
-;mov	byte [0xb815a],"E"
-;mov	r14,'ABCDE'
-;call	_break
 	call	_push
 	pop		rax
 	ret
@@ -440,17 +393,13 @@ _sfind:
 	ret
 
 _sfind2:
-	;mov	rsi,[context_value]	
 	mov	rsi,[rsi]
 _find2:
 	movzx	rbx,byte [rsi]
 	inc	bl
 	and	bl,078h
 	mov	rdi,[here_value]
-	;mov	r14,0x777
-	;call	_break
 	cmpsq
-	;mov	byte [0xb8154],"S"
 	je	_find1
 	add	rsi,rbx
 	mov	rsi,[rsi]
@@ -516,9 +465,7 @@ _0x:
 	bswap	rcx
 	mov	[rax+8],rbx
 	mov	[rax],rcx
-	
 	movdqu		xmm0,[rax]
-	
 	movdqu		xmm2,[fes]
 	movdqu		xmm3,[sixes]
 	movdqu		xmm4,[zeroes]
@@ -556,19 +503,6 @@ bytemask	dq	0ff00ff00ff00ffh
 ;------------------
 _skip_delimeters:
 	
-	;push	rsi
-	;mov	rsi,msg5
-	;call	[b_output]
-	;pop	rsi
-	;push	rsi
-	;push	rax
-	;push	rdi
-	;mov		rax,[nkey]
-	;call	_push
-	;call	_hex_dot
-	;pop		rdi
-	;pop		rax
-	;pop		rsi
 	sub	qword [nkey],1
 	jb	_word2
 	lodsb
@@ -684,9 +618,7 @@ _header:
 ;--------------------------------
 _vocabulary:
 	add		rax,8
-	;mov		[context_value],rax ;[current_value],rax;
 	call	_push
-	;call	_hex_dot
 	ret
 	
 ;--------------------------------
@@ -715,7 +647,6 @@ _vocabulary_create:
 	mov	qword [rsi],_vocabulary
 	add	rsi,16
 	mov	[rsi-8],rsi	;link to empty word, which is last in this list
-	;add	rsi,8
 	; set zero word 
 	mov	qword [rsi],6
 	add	rsi,8
@@ -775,18 +706,17 @@ _allot:
 ;--------------------------------
 _expect:
 	mov	rdi,tibb
-	mov	rcx,[tibb-8]
+	mov	rcx,[tibb-16]
 	call	 os_input
 	mov		qword [nkey],rcx
 	
 	ret
 ;--------------------------------
-align 32
-db 0cch
+align 32, db 0cch
 
-test4:	db	'1234567890ABCDEF'
-rkey:	 times 64  db	  0
-nkey	dq	0
+
+
+;nkey	dq	0
 align 16 
 
 
@@ -1196,6 +1126,8 @@ nfa_47:
 	dq	nfa_46
 	dq	_variable_code
 	dq	63	;tibsize
+nkey:
+	dq	0
 tibb:
 	times	64	 db	 20h 
 	dq	0606060606060606h
