@@ -135,11 +135,11 @@ _hex_dot:
 	mov	[hexstr],r15
 	mov	[hexstr+8],rax
 	mov	byte [hexstr+17],0
+	
 	call	_space
 	mov	rsi,hexstr
 	mov	rcx,16
 	call    os_output
-
 	call	_space
 	ret
 ;align 8
@@ -247,10 +247,10 @@ _interpret:
 	mov		rax,context_value
 	call	_push
 	call	_find_task_frame
-	call	_pop
-		
-	;	call	_dup	
-	;	call	_hex_dot	
+	;call	_pop
+	call	_hex_dot	
+		call	_dup	
+		call	_hex_dot	
 	call	_execute_code
 	jmp	_interpret
 
@@ -286,12 +286,24 @@ _enclose:
 	
 	mov	rdi,rbx
 	mov	rcx,[nkey]
+;mov	r14,0x1
+;mov	r12,[rdi]
+;all	_break
 	cmp	rcx,rdx
-	jl	_word2	
+	je	_word2	;jl
 
 	inc	rdi
 	
-	call	_skip_delimeters
+_skip_delimeters:
+	
+	sub	qword [nkey],1
+	je	_word2
+	lodsb
+	inc	qword [_in_value]
+	cmp	al,20h
+	jbe	_skip_delimeters
+			
+	;call	_skip_delimeters
 
 _word3:
 	
@@ -309,6 +321,7 @@ _word4:
 	
 	; string to validate
 	mov	[rbx],dl
+;or	r14,0x7800
 	ret
 
 _word2:
@@ -318,13 +331,20 @@ _word2:
 	;call	os_output
 	mov	qword [rbx],6 ;dl
 	mov	qword [_in_value],0
+;mov		r13,[rbx]
+;mov		r14,0x67
+;call	_break
 	
 	;mov	rax,[_in_value]
 	
 	ret
+;------------------
+
+	
+
 
 ;msg2	db	' String prepared to find:',0
-;msg7	db	' empty string ',0
+msg7	db	' empty string ',0
 ;msg8	db	' push symbol ',0
 ;msg5	db	' skips ',0
 ;msg6	db	' source string ',0
@@ -359,7 +379,7 @@ _find_task_frame:
 	push	rax
 ftf1:
 	pop		rax
-	add		rax,8
+	add		rax,8 ;
 	mov		rsi,[rax-8]
 	test	rsi,rsi
 	je		ftf		; last slot - zero
@@ -369,17 +389,22 @@ ftf1:
 	push	rax
 mov	byte [0xb8158],"Q"
 	call	_sfind2
-	call	_pop
+	call	_pop ; flag. on stack rest xt
 	
 	test	rax,rax
-	je		ftf1		;nothing found
+	je		ftf1		;nothing found in this context
 
-	call	_push
+	call	_push		;somefind found 
 	pop		rax	
 	ret
 ftf:
+	;
+	mov		rax,cr_;_ret
 	call	_push
-	pop		rax
+	;pop		rax
+	xor		rax,rax
+	call	_push
+;	call	_break
 	ret
 
 _find:
@@ -394,11 +419,22 @@ _sfind:
 
 _sfind2:
 	mov	rsi,[rsi]
+;push	rsi
+;mov		rsi,rdi
+;call	os_output
+;pop		rsi
 _find2:
 	movzx	rbx,byte [rsi]
 	inc	bl
 	and	bl,078h
 	mov	rdi,[here_value]
+	
+;push	rsi
+;mov		r12,[rdi]
+;mov		r11,[rsi]
+;rol		r14,1
+;call	_break
+;pop		rsi
 	cmpsq
 	je	_find1
 	add	rsi,rbx
@@ -419,7 +455,8 @@ _find2:
 	
 	test	rsi,rsi
 	jne	_find2
-	mov	rax,ret_
+	mov	rax,cr_;ret_
+;call	_break
 	call	_push
 	xor	rax,rax
 	call	_push
@@ -436,6 +473,7 @@ mov	byte [0xb8152],"F"
 	call	_push		; word found
 	ret
 ;-------------------
+
 _ret:
 	pop	rax
 	pop	rax
@@ -500,16 +538,7 @@ _0x:
 
 bytemask	dq	0ff00ff00ff00ffh
 			dq	0ff00ff00ff00ffh
-;------------------
-_skip_delimeters:
-	
-	sub	qword [nkey],1
-	jb	_word2
-	lodsb
-	inc	qword [_in_value]
-	cmp	al,20h
-	jbe	_skip_delimeters
-	ret
+
 	
 	
 ;--------------------
@@ -550,7 +579,7 @@ number3:
 
 number4:
 	;normalize number
-	; rdx - count of dihits
+	; rdx - count of digits
 	sub		rdi,16
 	mov		rax,rdi
 	call	_push
@@ -708,15 +737,19 @@ _expect:
 	mov	rdi,tibb
 	mov	rcx,[tibb-16]
 	call	 os_input
-	mov		qword [nkey],rcx
-	
+	mov		[block_value+8],rcx
+	;mov		qword [nkey],rcx
+;mov		r14,0x34
+;call	_break
 	ret
+;--------------------------------
+
 ;--------------------------------
 align 32, db 0cch
 
 
 
-;nkey	dq	0
+nkey	dq	0
 align 16 
 
 
@@ -751,6 +784,7 @@ nfa_3:
 	db	2,"CR",0
 	align 8, db 0
 	dq	nfa_2
+cr_:
 	dq	_cr
 	dq	0
 nfa_4:
@@ -809,11 +843,8 @@ nfa_10:
 	db	3,"DUP",0
 	align 8, db 0
 	dq	nfa_9
-	dq	_addr_interp
-	dq	pop_
-	dq	push_
-	dq	push_
-	dq	ret_
+	dq	_dup
+	dq	0
 
 nfa_11: 
 	db	3,"pop",0
@@ -1126,8 +1157,6 @@ nfa_47:
 	dq	nfa_46
 	dq	_variable_code
 	dq	63	;tibsize
-nkey:
-	dq	0
 tibb:
 	times	64	 db	 20h 
 	dq	0606060606060606h
