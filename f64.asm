@@ -247,10 +247,10 @@ _interpret:
 	mov		rax,context_value
 	call	_push
 	call	_find_task_frame
-	;call	_pop
-	call	_hex_dot	
-		call	_dup	
-		call	_hex_dot	
+	call	_pop
+	;call	_hex_dot	
+		;call	_dup	
+		;call	_hex_dot	
 	call	_execute_code
 	jmp	_interpret
 
@@ -399,7 +399,7 @@ mov	byte [0xb8158],"Q"
 	ret
 ftf:
 	;
-	mov		rax,cr_;_ret
+	mov		rax,badword_ ;cr_;_ret
 	call	_push
 	;pop		rax
 	xor		rax,rax
@@ -455,7 +455,7 @@ _find2:
 	
 	test	rsi,rsi
 	jne	_find2
-	mov	rax,cr_;ret_
+	mov	rax,badword_ ;cr_;ret_
 ;call	_break
 	call	_push
 	xor	rax,rax
@@ -743,7 +743,22 @@ _expect:
 ;call	_break
 	ret
 ;--------------------------------
-
+_vect:
+	mov	rax,[rax+8]
+	call	[rax]
+	ret
+;--------------------------------
+_abort:
+mov	rsi,msgbad
+call	os_output
+mov	rsi,[here_value]
+inc	rsi
+call	os_output
+mov	rsi,msgabort
+call	os_output
+	ret
+msgbad		db	"  Badword: ",0	
+msgabort	db	" Abort!",0
 ;--------------------------------
 align 32, db 0cch
 
@@ -909,6 +924,7 @@ nfa_18:
 	db	6,"CREATE",0
 	align 8, db 0
 	dq	nfa_17
+create_:
 	dq	_create
 	dq	0
 	
@@ -935,15 +951,13 @@ latest_:
 	;dq	ret_
 	
 nfa_21:
-	db	7,"_CREATE",0
+	db	7,"BADWORD",0
 	align 8, db 0
 	dq	nfa_20
-create_:
-	dq	_addr_interp
-	dq	header_
-	dq	variableb_
-	dq	comma_
-	dq	ret_
+badword_:
+	dq	_vect
+	dq	abort_ ;timer_
+	
 	
 nfa_22: 
 	db	5,"BLOCK",0
@@ -1150,7 +1164,7 @@ nfa_46:
 	dq	nfa_45
 	dq	_allot
 	dq	0
-nfa_last:
+
 nfa_47:
 	db	3,"TIB",0
 	align 8, db 0
@@ -1160,6 +1174,15 @@ nfa_47:
 tibb:
 	times	64	 db	 20h 
 	dq	0606060606060606h
+	
+nfa_last:
+nfa_48:
+	db	5,"ABORT",0
+	align 8, db 0
+	dq	nfa_47
+abort_:
+	dq	_abort
+	dq	0
 _here:
 
 	db	6,0,0
