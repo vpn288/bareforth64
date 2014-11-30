@@ -260,8 +260,8 @@ _bl:
 ;-------------------------
 ;get string from input buffer parse it and put to top of wordlist
 _word:
-	mov		rax,[block_value+8]
-	mov		[nkey],rax
+	;mov		rax,[block_value+8]
+	;mov		[block_value+8] ; [nkey],rax
 	mov		rax,[block_value+16]
 	call	_push
 	mov		rax,[here_value]
@@ -285,18 +285,18 @@ _enclose:
 	rep	stosq
 	
 	mov	rdi,rbx
-	mov	rcx,[nkey]
+	mov	rcx,[block_value+8] ; [nkey]
 ;mov	r14,0x1
-;mov	r12,[rdi]
-;all	_break
+;mov	r13,[rsi]
+;call	_break
 	cmp	rcx,rdx
-	je	_word2	;jl
+	jl	_word2	;jl
 
 	inc	rdi
 	
 _skip_delimeters:
 	
-	sub	qword [nkey],1
+	sub	qword [block_value+8],1 ; [nkey],1
 	je	_word2
 	lodsb
 	inc	qword [_in_value]
@@ -309,7 +309,7 @@ _word3:
 	
 	stosb
 	inc	rdx	
-	sub	qword [nkey],1	
+	sub	qword [block_value+8],1 ; [nkey],1	
 	jb	_word4
 	lodsb
 	inc	qword [_in_value]	
@@ -544,7 +544,7 @@ bytemask	dq	0ff00ff00ff00ffh
 ;--------------------
 _number:
 	mov		rax,[block_value+8]
-	mov		[nkey],rax
+	mov		[block_value+8],rax ; [nkey],rax
 	mov		rsi,[block_value+16]	
 	xor	rdx,rdx 
 	add	rsi,[_in_value]
@@ -556,7 +556,7 @@ _number:
 	rep	stosb
 	
 	mov	rdi,rbx
-	mov	rcx,[nkey]
+	mov	rcx,[block_value+8] ; [nkey]
 	cmp	rcx,rdx ; rdx=0
 	jl	number2 
 
@@ -570,7 +570,7 @@ number3:
 	; move to here +15
 	stosb
 	inc	rdx
-	sub	qword [nkey],1	
+	sub	qword [block_value+8],1 ; [nkey],1	
 	jb	number4
 	lodsb
 	inc	qword [_in_value]	
@@ -738,7 +738,7 @@ _expect:
 	mov	rcx,[tibb-16]
 	call	 os_input
 	mov		[block_value+8],rcx
-	;mov		qword [nkey],rcx
+	;mov		qword [block_value+8] ; [nkey],rcx
 ;mov		r14,0x34
 ;call	_break
 	ret
@@ -749,13 +749,13 @@ _vect:
 	ret
 ;--------------------------------
 _abort:
-mov	rsi,msgbad
-call	os_output
-mov	rsi,[here_value]
-inc	rsi
-call	os_output
-mov	rsi,msgabort
-call	os_output
+	mov	rsi,msgbad
+	call	os_output
+	mov	rsi,[here_value]
+	inc	rsi
+	call	os_output
+	mov	rsi,msgabort
+	call	os_output
 	ret
 msgbad		db	"  Badword: ",0	
 msgabort	db	" Abort!",0
@@ -1103,7 +1103,7 @@ nfa_38:
 	dq	header_
 	dq	constantb_
 	dq	comma_
-	dq	comma_
+	dq	comma_ 
 	dq	ret_
 	
 nfa_39:
