@@ -543,8 +543,8 @@ bytemask	dq	0ff00ff00ff00ffh
 	
 ;--------------------
 _number:
-	mov		rax,[block_value+8]
-	mov		[block_value+8],rax ; [nkey],rax
+	;mov		rax,[block_value+8]
+	;mov		[block_value+8],rax ; [nkey],rax
 	mov		rsi,[block_value+16]	
 	xor	rdx,rdx 
 	add	rsi,[_in_value]
@@ -558,11 +558,21 @@ _number:
 	mov	rdi,rbx
 	mov	rcx,[block_value+8] ; [nkey]
 	cmp	rcx,rdx ; rdx=0
+;mov	r13,[rsi]
+;call	_break
 	jl	number2 
 
 	inc	rdi
+_skip_delimeters2:
 	
-	call	_skip_delimeters
+	sub	qword [block_value+8],1 ; [nkey],1
+	je	number2
+	lodsb
+	inc	qword [_in_value]
+	cmp	al,20h
+	jbe	_skip_delimeters2
+			
+	;call	_skip_delimeters
 	mov		rdi,[here_value]
 	add		rdi,15
 	
@@ -581,6 +591,8 @@ number4:
 	;normalize number
 	; rdx - count of digits
 	sub		rdi,16
+;mov	r14,[rdi+8]
+;call	_break
 	mov		rax,rdi
 	call	_push
 	ret
