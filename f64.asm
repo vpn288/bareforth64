@@ -297,7 +297,7 @@ _enclose:
 _skip_delimeters:
 	
 	sub	qword [block_value+8],1 ; [nkey],1
-	je	_word2
+	jb	_word2
 	lodsb
 	inc	qword [_in_value]
 	cmp	al,20h
