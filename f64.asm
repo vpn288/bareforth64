@@ -732,11 +732,14 @@ _rdblock:
 	call	_pop	; block number
 	mov		rcx,rax
 	inc		rcx
-	shl		rcx,13
+	shl		rcx,4
 	call	_pop	; buffer
 	mov		rdi,rax
-	mov		rax,[fid]
-	;call	 [b_file_read]
+;	mov		rax,[fid]
+	mov		rdx,0
+	mov		rax,rcx
+	mov		rcx,16
+	call	 read_sectors ;[b_file_read]
 	
 	ret
 ;--------------------------------
