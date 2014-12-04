@@ -731,7 +731,23 @@ _dump2:
 _rdblock:
 	call	_pop	; block number
 	mov		rcx,rax
-	inc		rcx
+;	inc		rcx
+	shl		rcx,4
+	call	_pop	; buffer
+	mov		rdi,rax
+;	mov		rax,[fid]
+	mov		rdx,0
+	mov		rax,rcx
+	mov		rcx,16
+	call	 read_sectors ;[b_file_read]
+	
+	ret
+;--------------------------------
+;--------------------------------
+_wrblock:
+	call	_pop	; block number
+	mov		rcx,rax
+;	inc		rcx
 	shl		rcx,4
 	call	_pop	; buffer
 	mov		rdi,rax
@@ -1197,6 +1213,14 @@ nfa_48:
 	dq	nfa_47
 abort_:
 	dq	_abort
+	dq	0
+	
+nfa_last:
+nfa_49:
+	db	7,"wrblock",0
+	align 8, db 0
+	dq	nfa_48
+	dq	_wrblock
 	dq	0
 _here:
 
