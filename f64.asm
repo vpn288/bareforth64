@@ -1215,12 +1215,20 @@ abort_:
 	dq	_abort
 	dq	0
 	
-nfa_last:
+
 nfa_49:
 	db	7,"wrblock",0
 	align 8, db 0
 	dq	nfa_48
 	dq	_wrblock
+	dq	0
+	
+nfa_last:	
+nfa_50:
+	db	4,"LOAD",0
+	align 8, db 0
+	dq	nfa_49
+	dq	0 ;_wrblock
 	dq	0
 _here:
 
