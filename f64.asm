@@ -1223,11 +1223,17 @@ nfa_49:
 	dq	_wrblock
 	dq	0
 	
-nfa_last:	
 nfa_50:
 	db	4,"LOAD",0
 	align 8, db 0
 	dq	nfa_49
+	dq	0 ;_wrblock
+	dq	0
+nfa_last:	
+nfa_51:
+	db	1,"+",0
+	align 8, db 0
+	dq	nfa_50
 	dq	0 ;_wrblock
 	dq	0
 _here:
