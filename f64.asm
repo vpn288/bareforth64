@@ -716,7 +716,7 @@ _cellm:
 _dump:
 	call	_pop
 	mov		rdx,rax
-	mov		rcx,16
+	mov		rcx,64
 _dump2:
 	push	rcx
 	mov		rax,[rdx]
@@ -729,12 +729,13 @@ _dump2:
 	ret
 ;--------------------------------
 _rdblock:
-	call	_pop	; block number
-	mov		rcx,rax
-;	inc		rcx
-	shl		rcx,4
 	call	_pop	; buffer
 	mov		rdi,rax
+;	inc		rcx
+	
+	call	_pop	; block number
+	mov		rcx,rax
+	shl		rcx,4
 ;	mov		rax,[fid]
 	mov		rdx,0
 	mov		rax,rcx
@@ -790,6 +791,40 @@ _abort:
 	ret
 msgbad		db	"  Badword: ",0	
 msgabort	db	" Abort!",0
+;--------------------------------
+_load:
+	movdqu	xmm0,[block_value]
+	mov		rbx,[block_value+16]
+	mov		rax,[_in_value]
+	movdqu	[old_block],xmm0	
+	mov		[old_in],rax
+	mov		[old_blck],rbx
+	mov		r13,[r10 + r8] ; block number
+	mov		rax, buffer_+8
+	mov		[block_value+16],rax
+	call	_push
+	call	_rdblock
+	xor		rbx,rbx
+	pxor	xmm3,xmm3
+	mov		[_in_value],rbx
+	mov		qword [block_value+8],8192
+	call	_interpret
+	movdqu	xmm0,[old_block]
+	mov		rax,[old_in]
+	mov		rbx,[old_blck]
+	movdqu	[block_value],xmm0	
+	mov		[block_value+16],rbx
+	mov		[_in_value],rax
+	ret
+old_in		dq	0
+old_block:	dq	0
+			dq	0
+old_blck:	dq	0
+;--------------------------------
+_plus:
+	call	_pop
+	add		[r10 + r8],rax	
+	ret
 ;--------------------------------
 align 32, db 0cch
 
@@ -1206,7 +1241,6 @@ tibb:
 	times	64	 db	 20h 
 	dq	0606060606060606h
 	
-nfa_last:
 nfa_48:
 	db	5,"ABORT",0
 	align 8, db 0
@@ -1215,32 +1249,44 @@ abort_:
 	dq	_abort
 	dq	0
 	
-
 nfa_49:
 	db	7,"wrblock",0
 	align 8, db 0
 	dq	nfa_48
 	dq	_wrblock
 	dq	0
-	
+		
 nfa_50:
 	db	4,"LOAD",0
 	align 8, db 0
 	dq	nfa_49
-	dq	0 ;_wrblock
+	dq	_load
 	dq	0
-nfa_last:	
+	
 nfa_51:
-	db	1,"+",0
+	db	6,"BUFFER",0
 	align 8, db 0
 	dq	nfa_50
-	dq	0 ;_wrblock
+buffer_:
+	dq	_variable_code
+	times 8192 db	0
+nfa_last:
+nfa_52:
+	db	1,"+",0
+	align 8, db 0
+	dq	nfa_51
+	dq	_plus
 	dq	0
+	
+
 _here:
 
 	db	6,0,0
 	
 	dq	nfa_34
 
-
+align	8192,  db 0xbc
+times	7680 db 0xcd
+db	'   0x AABBCCEE      HEX.   '
+dq	6
 	times 1121  db 0xaa 
