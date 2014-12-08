@@ -1283,6 +1283,10 @@ _here:
 align	8192,  db 0xbc
 times	7680 db 0xcd
 db	'   0x AABBCCEE      HEX.   >IN @ HEX.  '
+db	'   0x 5 LOAD '
 dq	6
-times 8192 db	' '
+align 8192, db	' '
+db	'    0x FACE12   HEX.  '
+dq	6
+align 8192, db	' '
 times 1121  db 0xaa 
