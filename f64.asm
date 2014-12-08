@@ -793,33 +793,28 @@ msgbad		db	"  Badword: ",0
 msgabort	db	" Abort!",0
 ;--------------------------------
 _load:
-	movdqu	xmm0,[block_value]
-	mov		rbx,[block_value+16]
-	mov		rax,[_in_value]
-	movdqu	[old_block],xmm0	
-	mov		[old_in],rax
-	mov		[old_blck],rbx
-	mov		r13,[r10 + r8] ; block number
+	push 	qword [block_value]
+	push	qword [block_value+8]
+	push	qword [block_value+16]
+	push	qword [_in_value]
+	
 	mov		rax, buffer_+8
 	mov		[block_value+16],rax
 	call	_push
 	call	_rdblock
+	
 	xor		rbx,rbx
-	pxor	xmm3,xmm3
 	mov		[_in_value],rbx
 	mov		qword [block_value+8],8192
+	
 	call	_interpret
-	movdqu	xmm0,[old_block]
-	mov		rax,[old_in]
-	mov		rbx,[old_blck]
-	movdqu	[block_value],xmm0	
-	mov		[block_value+16],rbx
-	mov		[_in_value],rax
+	
+	pop		qword [_in_value]	
+	pop		qword [block_value+16]
+	pop		qword [block_value+8]
+	pop 	qword [block_value]
 	ret
-old_in		dq	0
-old_block:	dq	0
-			dq	0
-old_blck:	dq	0
+
 ;--------------------------------
 _plus:
 	call	_pop
@@ -1287,6 +1282,7 @@ _here:
 
 align	8192,  db 0xbc
 times	7680 db 0xcd
-db	'   0x AABBCCEE      HEX.   '
+db	'   0x AABBCCEE      HEX.   >IN @ HEX.  '
 dq	6
-	times 1121  db 0xaa 
+times 8192 db	' '
+times 1121  db 0xaa 
