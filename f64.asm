@@ -821,6 +821,38 @@ _plus:
 	add		[r10 + r8],rax	
 	ret
 ;--------------------------------
+opcode_code:
+	call create_code
+	mov eax,[here_var]
+	mov dword [eax-4],op_compile_code
+	call pop_code
+	mov cl,al
+	mov ebx,[here_var]
+	mov [ebx],al
+	inc ebx
+	and ecx,0ffh
+	add [here_var],ecx
+	inc dword [here_var]
+oc1:
+	call pop_code
+	mov [ebx],al
+	inc ebx
+	loop oc1
+	ret
+op_compile_code:
+	movzx ecx,byte [eax+4]
+	inc eax
+	mov edx,[top_of_code_val]
+	add [top_of_code_val],ecx
+occ1:
+	mov bl,[eax+4]
+	mov [cs:edx],bl
+	inc eax
+	inc edx
+	dec cl
+	jne occ1
+	ret
+;----------------------------
 align 32, db 0cch
 
 
