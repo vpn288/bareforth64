@@ -823,20 +823,20 @@ _plus:
 ;--------------------------------
 opcode_code:
 	call create_code
-	mov eax,[here_var]
-	mov dword [eax-4],op_compile_code
+	mov rax,[here_var]
+	mov dword [rax-8],op_compile_code
 	call pop_code
 	mov cl,al
-	mov ebx,[here_var]
-	mov [ebx],al
-	inc ebx
-	and ecx,0ffh
-	add [here_var],ecx
-	inc dword [here_var]
+	mov rbx,[here_value]
+	mov [rbx],al
+	inc rbx
+	and rcx,0ffh
+	add [here_value],rcx
+	inc qword [here_value]
 oc1:
 	call pop_code
-	mov [ebx],al
-	inc ebx
+	mov [rbx],al
+	inc rbx
 	loop oc1
 	ret
 op_compile_code:
