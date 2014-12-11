@@ -840,15 +840,15 @@ oc1:
 	loop oc1
 	ret
 op_compile_code:
-	movzx ecx,byte [eax+4]
-	inc eax
-	mov edx,[top_of_code_val]
-	add [top_of_code_val],ecx
+	movzx rcx,byte [rax+4]
+	inc rax
+	mov rdx,[top_of_code_val]
+	add [top_of_code_val],rcx
 occ1:
-	mov bl,[eax+4]
-	mov [cs:edx],bl
-	inc eax
-	inc edx
+	mov bl,[rax+4]
+	mov [rdx],bl
+	inc rax
+	inc rdx
 	dec cl
 	jne occ1
 	ret
