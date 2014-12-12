@@ -854,7 +854,7 @@ occ1:
 	ret
 ;----------------------------
 align 32, db 0cch
-
+code_top:
 
 
 nkey	dq	0
@@ -1297,7 +1297,7 @@ nfa_51:
 buffer_:
 	dq	_variable_code
 	times 8192 db	0
-nfa_last:
+
 nfa_52:
 	db	1,"+",0
 	align 8, db 0
@@ -1305,7 +1305,13 @@ nfa_52:
 	dq	_plus
 	dq	0
 	
-
+nfa_last:	
+nfa_53:
+	db	8,"code_top",0
+	align 8, db 0
+	dq	nfa_52
+	dq	_variable_code
+	dq	code_top
 _here:
 
 	db	6,0,0
