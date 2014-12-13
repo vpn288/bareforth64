@@ -21,7 +21,7 @@
 	call	_type
 	
 
-	mov		rax,nfa_0
+	mov	rax,nfa_0
 	call	_push
 	call	_count
 	call	_type
@@ -38,14 +38,9 @@ _f_system:
 	mov	rsi,msgf
 	call	 os_output
 	call	_cr
-	
+
 	call	 _expect
-	
-	;mov	rax,rcx
-	;call	_push
-	;call	_hex_dot
 	call	_interpret
-	;call	_0x
 	jmp	_f_system
 	
 	ret
@@ -54,7 +49,7 @@ _break:
 	push	rax
 	push	rsi
 	call	os_print_newline
-	mov		rsi,_break2
+	mov	rsi,_break2
 	call	os_output
 	pop		rsi
 	mov		rax,[rsp+8]
