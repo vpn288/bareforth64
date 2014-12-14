@@ -1,6 +1,12 @@
 
  sti
  tracefind equ 0
+ %define neworg		200000h
+  mov	rsi,vocabulary
+  mov	rdi,neworg
+  mov	rcx,8192
+  rep	movsq
+  
   
 	mov	r8,[data_stack_base]
 	xor	r10, r10
@@ -21,7 +27,7 @@
 	call	_type
 	
 
-	mov	rax,nfa_0
+	mov		rax,nfa_0
 	call	_push
 	call	_count
 	call	_type
@@ -38,9 +44,14 @@ _f_system:
 	mov	rsi,msgf
 	call	 os_output
 	call	_cr
-
+	
 	call	 _expect
+	
+	;mov	rax,rcx
+	;call	_push
+	;call	_hex_dot
 	call	_interpret
+	;call	_0x
 	jmp	_f_system
 	
 	ret
@@ -49,7 +60,7 @@ _break:
 	push	rax
 	push	rsi
 	call	os_print_newline
-	mov	rsi,_break2
+	mov		rsi,_break2
 	call	os_output
 	pop		rsi
 	mov		rax,[rsp+8]
@@ -139,7 +150,7 @@ _hex_dot:
 	ret
 ;align 8
 
-data_stack_base dq	0x200000
+data_stack_base dq	0x100000
 data_stack_mask dq	0x00ffff
 value	dq	0abcdefh
 		dq	0
@@ -198,7 +209,6 @@ _count:
 	mov	rbx,[rax]
 	and	rbx,03fh
 	inc	rax
-	
 	call	_push
 	mov	rax,rbx
 	
@@ -213,6 +223,8 @@ _variable_code:
 _execute_code:
 	call	_pop
 _execute:
+;mov		r14,[rax]
+;call	_break
 	call  [rax]
 	ret
 ;------------------------
@@ -816,49 +828,54 @@ _plus:
 	add		[r10 + r8],rax	
 	ret
 ;--------------------------------
+
 opcode_code:
-	call create_code
-	mov rax,[here_var]
-	mov dword [rax-8],op_compile_code
-	call pop_code
-	mov cl,al
-	mov rbx,[here_value]
-	mov [rbx],al
-	inc rbx
-	and rcx,0ffh
-	add [here_value],rcx
-	inc qword [here_value]
+call _create
+mov rax,[here_value]
+mov dword [rax-8],op_compile_code
+call _pop
+mov cl,al
+mov rbx,[here_value]
+mov [rbx],al
+inc rbx
+and rcx,0ffh
+add [here_value],rcx
+inc qword [here_value]
 oc1:
-	call pop_code
-	mov [rbx],al
-	inc rbx
-	loop oc1
-	ret
+call _pop
+mov [rbx],al
+inc rbx
+loop oc1
+ret
 op_compile_code:
-	movzx rcx,byte [rax+4]
-	inc rax
-	mov rdx,[top_of_code_val]
-	add [top_of_code_val],rcx
+movzx rcx,byte [rax+4]
+inc rax
+mov rdx,[top_of_code_val]
+add [top_of_code_val],rcx
 occ1:
-	mov bl,[rax+4]
-	mov [rdx],bl
-	inc rax
-	inc rdx
-	dec cl
-	jne occ1
-	ret
-;----------------------------
-align 32, db 0cch
+mov bl,[rax+4]
+mov [rdx],bl
+inc rax
+inc rdx
+dec cl
+jne occ1
+ret
+;--------------------------------
 code_top:
+
+align 32, db 0cch
+
 
 
 nkey	dq	0
-align 16 
 
+
+align 8192
+vocabulary:
+section	seconf start=neworg
 
 nfa_0:
-	db 7, "FORTH64" ; neiaa?u aey neia ?aaeuiiai, ae?ooaeuiiai 86
-	db 0 ; oa?ieie?o?ua-au?aaieaa?uea ioee
+	db 7, "FORTH64",0 	
 	align 8, db 0
 	dq  0 ;LFA
 	dq _vocabulary ;CFA
@@ -1300,13 +1317,21 @@ nfa_52:
 	dq	_plus
 	dq	0
 	
-nfa_last:	
 nfa_53:
-	db	8,"code_top",0
+	db	9,"code_here",0
 	align 8, db 0
 	dq	nfa_52
-	dq	_variable_code
+	dq	_constant
+top_of_code_val:
 	dq	code_top
+
+nfa_last:
+nfa_54:
+	db	8,"startvoc",0
+	align 8, db 0
+	dq	nfa_53
+	dq	_constant
+	dq	nfa_0
 _here:
 
 	db	6,0,0
@@ -1316,7 +1341,6 @@ _here:
 align	8192,  db 0xbc
 times	7680 db 0xcd
 db	'   0x AABBCCEE      HEX.   >IN @ HEX.  '
-db	'   0x 5 LOAD '
 dq	6
 align 8192, db	' '
 db	'    0x FACE12   HEX.  '
