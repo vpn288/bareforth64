@@ -829,7 +829,7 @@ _plus:
 	ret
 ;--------------------------------
 
-opcode_code:
+_opcode_code:
 call _create
 mov rax,[here_value]
 mov dword [rax-8],op_compile_code
@@ -847,13 +847,14 @@ mov [rbx],al
 inc rbx
 loop oc1
 ret
+
 op_compile_code:
-movzx rcx,byte [rax+4]
+movzx rcx,byte [rax+8]
 inc rax
 mov rdx,[top_of_code_val]
 add [top_of_code_val],rcx
 occ1:
-mov bl,[rax+4]
+mov bl,[rax+8]
 mov [rdx],bl
 inc rax
 inc rdx
@@ -1327,11 +1328,11 @@ top_of_code_val:
 
 nfa_last:
 nfa_54:
-	db	8,"startvoc",0
+	db	6,"opcode",0
 	align 8, db 0
 	dq	nfa_53
-	dq	_constant
-	dq	nfa_0
+	dq	_opcode_code
+	dq	0
 _here:
 
 	db	6,0,0
@@ -1341,7 +1342,8 @@ _here:
 align	8192,  db 0xbc
 times	7680 db 0xcd
 db	'   0x AABBCCEE      HEX.   >IN @ HEX.  '
-db	' VOCABULARY ASSEMBLER  ASSEMBLER CURRENT ! '
+db	' VOCABULARY ASSEMBLER ASSEMBLER CURRENT ! '
+db	' 0x 90 0x 1 opcode nop '
 dq	6
 align 8192, db	' '
 db	'    0x FACE12   HEX.  '
