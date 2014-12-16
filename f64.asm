@@ -1344,6 +1344,7 @@ times	7680 db 0xcd
 db	'   0x AABBCCEE      HEX.   >IN @ HEX.  '
 db	' VOCABULARY ASSEMBLER ASSEMBLER CURRENT ! '
 db	' 0x 90 0x 1 opcode nop '
+db	' 0x CC 0x 1 opcode int3 '
 dq	6
 align 8192, db	' '
 db	'    0x FACE12   HEX.  '
