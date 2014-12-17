@@ -862,6 +862,21 @@ dec cl
 jne occ1
 ret
 ;--------------------------------
+label_code:
+call create_code
+mov eax,[here_var]
+mov dword [eax-4],label_compile_code
+call comma_code
+ret
+label_compile_code:
+mov ebx,[eax+4]
+sub ebx,2
+mov eax,[top_of_code_val]
+sub ebx,eax
+mov [cs:eax],bx
+add dword [top_of_code_val],2
+ret
+;-------------------------------
 code_top:
 
 align 32, db 0cch
