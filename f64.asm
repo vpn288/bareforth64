@@ -706,9 +706,9 @@ _vocabulary_create:
 	add	rsi,8
 	mov	[here_value],rsi
 		
-	mov		rax,rsi
-	call	_push
-	call	_hex_dot
+	;mov		rax,rsi
+	;call	_push
+	;call	_hex_dot
 	ret
 ;--------------------------------
 _cellp:
@@ -862,22 +862,21 @@ dec cl
 jne occ1
 ret
 ;--------------------------------
-label_code:
-call create_code
-mov eax,[here_var]
-mov dword [eax-4],label_compile_code
-call comma_code
-ret
-label_compile_code:
-mov ebx,[eax+4]
-sub ebx,2
-mov eax,[top_of_code_val]
-sub ebx,eax
-mov [cs:eax],bx
-add dword [top_of_code_val],2
-ret
-;-------------------------------
+_sp@:
+	mov		rax,r10
+	call	_push
+	ret
+;--------------------------------
 code_top:
+mov	rax,0xAAAAAAAAAAAAAAAA
+mov	r11,0xBBBBBBBBBBBBBBBB
+mov	rax,[rax]
+call	rax
+call	r11
+call	[r11]
+
+mov	rbx,rax
+sub	rax,rbx
 
 align 32, db 0cch
 
@@ -1341,12 +1340,19 @@ nfa_53:
 top_of_code_val:
 	dq	code_top
 
-nfa_last:
 nfa_54:
 	db	6,"opcode",0
 	align 8, db 0
 	dq	nfa_53
 	dq	_opcode_code
+	dq	0
+	
+nfa_last:	
+nfa_55:
+	db	3,"SP@",0
+	align 8, db 0
+	dq	nfa_54
+	dq	_sp@
 	dq	0
 _here:
 
@@ -1358,8 +1364,22 @@ align	8192,  db 0xbc
 times	7680 db 0xcd
 db	'   0x AABBCCEE      HEX.   >IN @ HEX.  '
 db	' VOCABULARY ASSEMBLER ASSEMBLER CURRENT ! '
-db	' 0x 90 0x 1 opcode nop '
-db	' 0x CC 0x 1 opcode int3 '
+db	'             0x 90 0x 1 opcode nop '
+db	'             0x CC 0x 1 opcode int3 '
+db	'             0x C3 0x 1 opcode ret '
+db	'       0x B8 0x 48 0x 2 opcode mov_rax,# ' 
+db	'       0x BB 0x 49 0x 2 opcode mov_r11,# '
+db	'		0x D0 0x FF 0x 2 opcode call_rax '
+db	' 0x 00 0x 8B 0x 48 0x 3 opcode mov_rax,[rax] '
+db	' 0x C3 0x 89 0x 48 0x 3 opcode mov_rbx,rax '
+db	' 0x D8 0x 29 0x 48 0x 3 opcode sub_rax,rbx '
+db	' 0x D3 0x FF 0x 41 0x 3 opcode call_r11 '
+; db	' 0x 13 0x FF 0x 41 0x 3 opcode call_[r11] '
+
+db	' FORTH64 CURRENT ! '
+db	' ASSEMBLER CONTEXT CELL+ ! '
+db	" HEADER -   code_here DUP HEX.  ,  mov_r11,#   ' pop  @ DUP HEX. code_here DUP HEX. nop nop nop nop nop nop nop nop ' ! DUP HEX. @ HEX. HEX.  call_r11  mov_rbx,rax  "
+db	"           call_r11 sub_rax,rbx  mov_r11,#  ' push @  code_here nop nop nop nop nop nop nop nop !  call_r11  ret "
 dq	6
 align 8192, db	' '
 db	'    0x FACE12   HEX.  '
