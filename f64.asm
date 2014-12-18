@@ -1,5 +1,5 @@
 
-%include f/fstart.asm
+%include "f/fstart.asm"
 ;----------------------
 _break:	
 	push	rax
