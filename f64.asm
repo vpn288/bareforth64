@@ -55,63 +55,6 @@ _filen: db	"forth.blk", 0
 fid:	dq	0
 msgf:	db	"forth>",0 
 
-_hex_dot:
-	call	_pop
-	mov	[value],rax
-
-	movdqu	xmm0, [value] ;
-	pxor	xmm1,xmm1
-	punpcklbw	xmm0,xmm1
-	movdqa	xmm1,xmm0
-	pand	xmm1,[fes]
-
-	psllq	xmm0,4
-	pand	xmm0,[fes]
-	por	xmm0,xmm1
-	movdqa	xmm1,xmm0
-	paddb	xmm1,[sixes]
-	psrlq	xmm1,4
-	pand	xmm1,[fes]
-	pxor	xmm9,xmm9
-	psubb	xmm9,xmm1
-	pand	xmm9,[sevens]
-	paddb	xmm0,xmm9
-	paddb	xmm0,[zeroes]
-	movdqu	[hexstr],xmm0
-	mov	rax,[hexstr]
-	mov	r15,[hexstr+8]
-
-	bswap	rax
-	bswap	r15
-	mov	[hexstr],r15
-	mov	[hexstr+8],rax
-	mov	byte [hexstr+17],0
-	
-	call	_space
-	mov	rsi,hexstr
-	mov	rcx,16
-	call    os_output
-	call	_space
-	ret
-;align 8
-
-data_stack_base dq	0x100000
-data_stack_mask dq	0x00ffff
-value	dq	0abcdefh
-		dq	0
-
-zeroes: dq	3030303030303030h
-		dq	3030303030303030h
-
-sixes:	dq	0606060606060606h
-		dq	0606060606060606h
-
-sevens: dq	0707070707070707h
-		dq	0707070707070707h
-fes	 	dq	 0x0f0f0f0f0f0f0f0f
-		dq	0x0f0f0f0f0f0f0f0f
- 
-hexstr: times 33  db 0 
 
 ;-----------------------
 ;_emit:
