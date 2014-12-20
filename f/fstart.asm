@@ -1,7 +1,5 @@
 
-        sti
-tracefind equ 0
-%define neworg 200000h
+       
 ; move vocabulary up        
         mov	rsi,vocabulary
         mov	rdi,neworg
