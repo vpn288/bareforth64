@@ -1,4 +1,6 @@
-
+ sti
+tracefind equ 0
+%define neworg 200000h
 %include 	"f/fstart.asm"
 %include	"f/atoitoa.asm"
 ;----------------------
