@@ -1,8 +1,10 @@
+
  sti
-tracefind equ 0
-%define neworg 200000h
-%include 	"f/fstart.asm"
-%include	"f/atoitoa.asm"
+ tracefind equ 0
+ %define neworg		200000h
+ %include "f/fstart.asm"
+ %include "f/atoitoa.asm"
+ %include "f/io.asm"
 ;----------------------
 _break:	
 	push	rax
@@ -44,14 +46,7 @@ _timer:
 	call	_push
 	ret
 ;---------------------
-_type:
-	call	_pop
-	mov	rcx,rax
-	call	_pop
-	mov	rsi,rax
-	call	os_output
-	ret
-;--------------------------------	
+
 
 	
 _filen: db	"forth.blk", 0
@@ -59,39 +54,7 @@ fid:	dq	0
 msgf:	db	"forth>",0 
 
 
-;-----------------------
-;_emit:
-
-
-_space:
-	mov	rax,' '
-	call	_push
-	call	_emit
-	ret
-
-;------------------------
 	
-
-_emit:
-	call	_pop
-	;mov	[_emit0],al
-	;lea	rsi,[r10 + r8] ;_emit0
-       ;mov	rcx,1
-	;call	_pop
-	call    os_output_char
-	;call	_pop
-	ret
-
-;------------------------
-_cr:
-	mov	rcx,2
-	mov	rsi,_cr_symb
-	
-	call	os_print_newline
-	
-	ret
-_cr_symb	db 0dh,0ah
-;------------------------
 
 ;-------------------------
 _count:
@@ -145,7 +108,7 @@ _interpret:
 	mov		rax,context_value
 	call	_push
 	call	_find_task_frame
-	call	_pop
+	;call	_pop
 	;call	_hex_dot	
 		;call	_dup	
 		;call	_hex_dot	
@@ -247,7 +210,7 @@ msg7	db	' empty string ',0
 ;msg5	db	' skips ',0
 ;msg6	db	' source string ',0
 ;-------------------------------
-;search string from top of wordlist in wordlist
+;search string from here in wordlist
 _find_task:
 	call	_pop
 	test	rax,rax
@@ -261,17 +224,19 @@ _find_task:
 	mov	rbx,rax
 	call	_pop
 	mov	rcx,rax
+	
 _find_task3:
 	call	_pop
 	test	rax,rax
 	jne	_find_task3
+	
 	mov	rax,rcx
 	call	_push
 	mov	rax,rbx
 	call	_push		
 _find_task2:
 	ret
-	
+;----------------------------	
 _find_task_frame:
 	call	_pop	;address of context frame
 	push	rax
@@ -292,16 +257,16 @@ mov	byte [0xb8158],"Q"
 	test	rax,rax
 	je		ftf1		;nothing found in this context
 
-	call	_push		;somefind found 
+;	call	_push		;somefind found 
 	pop		rax	
 	ret
 ftf:
 	;
-	mov		rax,badword_ ;cr_;_ret
-	call	_push
+	;mov		rax,badword_ ;cr_;_ret
+	;call	_push
 	;pop		rax
-	xor		rax,rax
-	call	_push
+;	xor		rax,rax
+;	call	_push
 ;	call	_break
 	ret
 
@@ -564,66 +529,11 @@ _cellm:
 	ret
 ;--------------------------------
 
-_dump:
-	call	_pop
-	mov		rdx,rax
-	mov		rcx,64
-_dump2:
-	push	rcx
-	mov		rax,[rdx]
-	call	_push
-	call	_hex_dot
-	call	_space
-	add		rdx,8
-	pop		rcx
-	loop	_dump2
-	ret
 ;--------------------------------
-_rdblock:
-	call	_pop	; buffer
-	mov		rdi,rax
-;	inc		rcx
-	
-	call	_pop	; block number
-	mov		rcx,rax
-	shl		rcx,4
-;	mov		rax,[fid]
-	mov		rdx,0
-	mov		rax,rcx
-	mov		rcx,16
-	call	 read_sectors ;[b_file_read]
-	
-	ret
-;--------------------------------
-;--------------------------------
-_wrblock:
-	call	_pop	; block number
-	mov		rcx,rax
-;	inc		rcx
-	shl		rcx,4
-	call	_pop	; buffer
-	mov		rdi,rax
-;	mov		rax,[fid]
-	mov		rdx,0
-	mov		rax,rcx
-	mov		rcx,16
-	call	 read_sectors ;[b_file_read]
-	
-	ret
-;--------------------------------
+
 _allot:
 	call	_pop
 	add		[here_value],rax
-	ret
-;--------------------------------
-_expect:
-	mov	rdi,tibb
-	mov	rcx,[tibb-16]
-	call	 os_input
-	mov		[block_value+8],rcx
-	;mov		qword [block_value+8] ; [nkey],rcx
-;mov		r14,0x34
-;call	_break
 	ret
 ;--------------------------------
 _vect:
@@ -709,6 +619,18 @@ ret
 _sp@:
 	mov		rax,r10
 	call	_push
+	ret
+;--------------------------------
+_resn:
+	call	_pop
+	add		[top_of_code_val],rax
+	ret
+;--------------------------------
+lit_code:
+	mov rax,[rsp+8]
+	mov rax,[eax+8]
+	call _push
+	add qword [rsp+8],8
 	ret
 ;--------------------------------
 code_top:
@@ -1191,12 +1113,27 @@ nfa_54:
 	dq	_opcode_code
 	dq	0
 	
-nfa_last:	
+	
 nfa_55:
 	db	3,"SP@",0
 	align 8, db 0
 	dq	nfa_54
 	dq	_sp@
+	dq	0
+	
+nfa_56:	
+	db	4,"RESn",0
+	align 8, db 0
+	dq	nfa_55
+	dq	_resn
+	dq	0
+	
+nfa_last:
+nfa_57:
+	db	3,"LIT",0
+	align 8, db 0
+	dq	nfa_56
+	dq	lit_code
 	dq	0
 _here:
 
@@ -1208,6 +1145,7 @@ align	8192,  db 0xbc
 times	7680 db 0xcd
 db	'   0x AABBCCEE      HEX.   >IN @ HEX.  '
 db	' VOCABULARY ASSEMBLER ASSEMBLER CURRENT ! '
+;db	" HEADER RESn  interpret# , ' code_here CELL+ @ +   ' code_here CELL+ ! ret# ,  "
 db	'             0x 90 0x 1 opcode nop '
 db	'             0x CC 0x 1 opcode int3 '
 db	'             0x C3 0x 1 opcode ret '
@@ -1222,11 +1160,12 @@ db	' 0x D3 0x FF 0x 41 0x 3 opcode call_r11 '
 
 db	' FORTH64 CURRENT ! '
 db	' ASSEMBLER CONTEXT CELL+ ! '
-db	" HEADER -   code_here DUP HEX.  ,  mov_r11,#   ' pop  @ DUP HEX. code_here DUP HEX. nop nop nop nop nop nop nop nop ' ! DUP HEX. @ HEX. HEX.  call_r11  mov_rbx,rax  "
-db	"           call_r11 sub_rax,rbx  mov_r11,#  ' push @  code_here nop nop nop nop nop nop nop nop !  call_r11  ret "
+db	" HEADER -   code_here DUP HEX.  ,  mov_r11,#   ' pop @  code_here !   0x 8 RESn " 
+db	"  call_r11  mov_rbx,rax  "
+db	"  call_r11 sub_rax,rbx  mov_r11,#  ' push @  code_here  ! 0x 8 RESn  call_r11  ret "
 dq	6
 align 8192, db	' '
-db	'    0x FACE12   HEX.  '
+db	"  HEADER jj  interpret# ,  ' LIT ,  0x FACE12  ,  ' HEX. ,  ret# ,  "
 dq	6
 align 8192, db	' '
 times 1121  db 0xaa 
