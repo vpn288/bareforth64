@@ -1143,4 +1143,4 @@ _here:
 
 align	8192,  db 0xbc
 times	7680 db 0xcd
-
+%include "f/blocks.asm"
