@@ -633,6 +633,21 @@ lit_code:
 	add qword [rsp+8],8
 	ret
 ;--------------------------------
+_link:
+; aa bb
+		call	_pop 	;base vocabulary
+		mov		rbx,rax
+		call	_pop	;linking vocabulary
+		mov		rbx,[rbx]
+		add		rax,16
+		mov		[rax],rbx
+		ret
+;--------------------------------
+_unlink:
+		call	_pop
+		mov		qword [rax+16],0
+		ret
+;--------------------------------	
 code_top:
 mov	rax,0xAAAAAAAAAAAAAAAA
 mov	r11,0xBBBBBBBBBBBBBBBB
@@ -1128,12 +1143,26 @@ nfa_56:
 	dq	_resn
 	dq	0
 	
-nfa_last:
 nfa_57:
 	db	3,"LIT",0
 	align 8, db 0
 	dq	nfa_56
 	dq	lit_code
+	dq	0
+	
+nfa_58:
+	db	4,"LINK",0
+	align 8, db 0
+	dq	nfa_57
+	dq	_link
+	dq	0
+	
+nfa_last:	
+nfa_59:
+	db	6,"UNLINK",0
+	align 8, db 0
+	dq	nfa_58
+	dq	_unlink
 	dq	0
 _here:
 
@@ -1143,4 +1172,5 @@ _here:
 
 align	8192,  db 0xbc
 times	7680 db 0xcd
-%include "f/blocks.asm"
+
+	%include "f/blocks.asm"
