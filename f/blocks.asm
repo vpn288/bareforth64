@@ -20,7 +20,11 @@ db	"  call_r11  mov_rbx,rax  "
 db	"  call_r11 sub_rax,rbx  mov_r11,#  ' push @  code_here  ! 0x 8 RESn  call_r11  ret "
 dq	6
 align 8192, db	' '
+db	" VOCABULARY cc cc CURRENT ! cc FORTH64 LINK cc CONTEXT ! "
+db 	" VARIABLE kk  0x ACED kk ! "
 db	"  HEADER jj  interpret# ,  ' LIT ,  0x FACE12  ,  ' HEX. ,  ret# ,  "
+db	" FORTH64 CURRENT ! "
+db	"  " 
 dq	6
 align 8192, db	' '
 times 1121  db 0xaa 
