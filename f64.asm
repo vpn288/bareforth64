@@ -46,15 +46,10 @@ _timer:
 	call	_push
 	ret
 ;---------------------
-
-
 	
 _filen: db	"forth.blk", 0
 fid:	dq	0
 msgf:	db	"forth>",0 
-
-
-	
 
 ;-------------------------
 _count:
@@ -281,7 +276,7 @@ _sfind:
 	ret
 
 _sfind2:
-	mov	rsi,[rsi]
+	mov	rsi,[rsi] ;vocid
 ;push	rsi
 ;mov		rsi,rdi
 ;call	os_output
@@ -301,6 +296,7 @@ _find2:
 	cmpsq
 	je	_find1
 	add	rsi,rbx
+	mov	rcx,rsi
 	mov	rsi,[rsi]
 
 ;	 %if tracefind = 1
@@ -318,7 +314,8 @@ _find2:
 	
 	test	rsi,rsi
 	jne	_find2
-	mov	rax,badword_ ;cr_;ret_
+	mov		rax,rcx
+	add		rax,24 ;mov	rax,badword_ ;cr_;ret_
 ;call	_break
 	call	_push
 	xor	rax,rax
@@ -502,8 +499,10 @@ _vocabulary_create:
 	mov		rax,rsi
 	
 	mov	qword [rsi],_vocabulary
-	add	rsi,16
-	mov	[rsi-8],rsi	;link to empty word, which is last in this list
+	add	rsi,24
+	mov	[rsi-16],rsi	;link to empty word, which is last in this list
+mov	qword [rsi-8],_abort
+;add	rsi,8
 	; set zero word 
 	mov	qword [rsi],6
 	add	rsi,8
@@ -639,15 +638,15 @@ _link:
 		mov		rbx,rax
 		call	_pop	;linking vocabulary
 		mov		rbx,[rbx]
-		add		rax,16
+		add		rax,24
 		mov		[rax],rbx
 		ret
 ;--------------------------------
 _unlink:
 		call	_pop
-		mov		qword [rax+16],0
+		mov		qword [rax+24],0
 		ret
-;--------------------------------	
+;--------------------------------		
 code_top:
 mov	rax,0xAAAAAAAAAAAAAAAA
 mov	r11,0xBBBBBBBBBBBBBBBB
