@@ -670,6 +670,8 @@ align 8192
 vocabulary:
 section	seconf start=neworg
 
+%include "vocabulary.asm"
+
 _here:
 
 	db	6,0,0
