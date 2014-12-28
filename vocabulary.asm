@@ -2,21 +2,22 @@
 nfa_0:
 	db 7, "FORTH64",0 	
 	align 8, db 0
-	dq  0 ;LFA
+	dq  nfa_0.5 ;LFA
 	dq _vocabulary ;CFA
  f64_list:
 	dq nfa_last ;PFA - oeacaoaeu ia eoa iineaaiaai ii?aaaeaiiiai neiaa
+dq	_abort
 nfa_0.5:
 	db	6,0,0
 	align 8, db 0
-	dq	nfa_0
+	dq	0
 ret_:
 	dq	_ret
 
 nfa_1:
 	db	4,"HEX." ,0
 	align 8, db 0
-	dq	nfa_0.5 
+	dq	nfa_0 
 	dq	_hex_dot
 	dq	0
 nfa_2:
@@ -493,3 +494,4 @@ nfa_59:
 	dq	nfa_58
 	dq	_unlink
 	dq	0
+
