@@ -315,7 +315,8 @@ _find2:
 	test	rsi,rsi
 	jne	_find2
 	mov		rax,rcx
-	add		rax,24 ;mov	rax,badword_ ;cr_;ret_
+	sub		rax,16
+	;add		rax,24 ;mov	rax,badword_ ;cr_;ret_
 ;call	_break
 	call	_push
 	xor	rax,rax
@@ -501,6 +502,7 @@ _vocabulary_create:
 	mov	qword [rsi],_vocabulary
 	add	rsi,24
 	mov	[rsi-16],rsi	;link to empty word, which is last in this list
+;mov	qword [rsi-16],_vect	
 mov	qword [rsi-8],_abort
 ;add	rsi,8
 	; set zero word 
@@ -646,7 +648,7 @@ _unlink:
 		call	_pop
 		mov		qword [rax+24],0
 		ret
-;--------------------------------		
+;--------------------------------	
 code_top:
 mov	rax,0xAAAAAAAAAAAAAAAA
 mov	r11,0xBBBBBBBBBBBBBBBB
