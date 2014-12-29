@@ -6,7 +6,7 @@ nfa_0:
 	dq _vocabulary ;CFA
  f64_list:
 	dq nfa_last ;PFA - oeacaoaeu ia eoa iineaaiaai ii?aaaeaiiiai neiaa
-dq	_abort
+	dq	_abort ; could be redefined for another reaction to wrong word
 nfa_0.5:
 	db	6,0,0
 	align 8, db 0
