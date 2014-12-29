@@ -72,8 +72,6 @@ _variable_code:
 _execute_code:
 	call	_pop
 _execute:
-;mov		r14,[rax]
-;call	_break
 	call  [rax]
 	ret
 ;------------------------
