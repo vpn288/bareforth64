@@ -42,3 +42,5 @@ _f_system:
 ;call _0x
         jmp	_f_system
         ret
+;---------------------
+msgf:	db	"forth>",0 
