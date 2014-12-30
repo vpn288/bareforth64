@@ -44,8 +44,6 @@ _timer:
 	shrd	rax,rdx,32
 	call	_push
 	ret
-;---------------------
-msgf:	db	"forth>",0 
 ;-------------------------
 _count:
 	call	_pop
