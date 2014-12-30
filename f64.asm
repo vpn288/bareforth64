@@ -27,8 +27,8 @@ _break2	db	"Control point:",0
 
 ;------------------------------
   _pop:
-    mov rax , [ r10 + r8 ]
-    sub r10 , 8
+	mov rax , [ r10 + r8 ]
+	sub r10 , 8
 	and r10 , r9
 	ret
 ;------------------------------     
@@ -36,7 +36,6 @@ _break2	db	"Control point:",0
 	add r10 , 8
 	and r10 , r9
 	mov [ r10 + r8 ] , rax
-
 	ret
 ;--------------------------------
 _timer: 
@@ -46,11 +45,7 @@ _timer:
 	call	_push
 	ret
 ;---------------------
-	
-_filen: db	"forth.blk", 0
-fid:	dq	0
 msgf:	db	"forth>",0 
-
 ;-------------------------
 _count:
 	call	_pop
@@ -65,7 +60,7 @@ _count:
 	ret
 ;-------------------------
 _variable_code:
-	add		rax,8
+	add	rax,8
 	call	_push
 	ret
 ;-------------------------
