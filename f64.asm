@@ -107,8 +107,6 @@ _bl:
 ;-------------------------
 ;get string from input buffer parse it and put to top of wordlist
 _word:
-	;mov		rax,[block_value+8]
-	;mov		[block_value+8] ; [nkey],rax
 	mov		rax,[block_value+16]
 	call	_push
 	mov		rax,[here_value]
@@ -132,7 +130,7 @@ _enclose:
 	rep	stosq
 	
 	mov	rdi,rbx
-	mov	rcx,[block_value+8] ; [nkey]
+	mov	rcx,[block_value+8] ; 
 ;mov	r14,0x1
 ;mov	r13,[rsi]
 ;call	_break
@@ -143,7 +141,7 @@ _enclose:
 	
 _skip_delimeters:
 	
-	sub	qword [block_value+8],1 ; [nkey],1
+	sub	qword [block_value+8],1 
 	jb	_word2
 	lodsb
 	inc	qword [_in_value]
