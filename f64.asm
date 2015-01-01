@@ -147,14 +147,12 @@ _skip_delimeters:
 	inc	qword [_in_value]
 	cmp	al,20h
 	jbe	_skip_delimeters
-			
-	;call	_skip_delimeters
 
 _word3:
 	
 	stosb
 	inc	rdx	
-	sub	qword [block_value+8],1 ; [nkey],1	
+	sub	qword [block_value+8],1 	
 	jb	_word4
 	lodsb
 	inc	qword [_in_value]	
@@ -166,7 +164,6 @@ _word4:
 	
 	; string to validate
 	mov	[rbx],dl
-;or	r14,0x7800
 	ret
 
 _word2:
