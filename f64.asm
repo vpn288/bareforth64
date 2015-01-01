@@ -107,9 +107,9 @@ _bl:
 ;-------------------------
 ;get string from input buffer parse it and put to top of wordlist
 _word:
-	mov		rax,[block_value+16]
+	mov	rax,[block_value+16]
 	call	_push
-	mov		rax,[here_value]
+	mov	rax,[here_value]
 	call	_push
 	call	_enclose
 	ret
@@ -117,9 +117,9 @@ _word:
 ;--------------------------------
 _enclose:
 	call	_pop	;	to address
-	mov		rdi,rax
+	mov	rdi,rax
 	call	_pop	; from address
-	mov		rsi,rax
+	mov	rsi,rax
 	
 	xor	rdx,rdx
 	add	rsi,[_in_value]
