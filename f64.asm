@@ -171,14 +171,11 @@ _word2:
 	; empty string
 	;mov	rsi,msg7
 	;call	os_output
-	mov	qword [rbx],6 ;dl
+	mov	qword [rbx],6 
 	mov	qword [_in_value],0
 ;mov		r13,[rbx]
 ;mov		r14,0x67
 ;call	_break
-	
-	;mov	rax,[_in_value]
-	
 	ret
 ;------------------
 
@@ -231,14 +228,13 @@ ftf1:
 	je		ftf1
 	dec		rsi	
 	push	rax
-mov	byte [0xb8158],"Q"
+жmov	byte [0xb8158],"Q"
 	call	_sfind2
 	call	_pop ; flag. on stack rest xt
 	
 	test	rax,rax
 	je		ftf1		;nothing found in this context
 
-;	call	_push		;somefind found 
 	pop		rax	
 	ret
 ftf:
