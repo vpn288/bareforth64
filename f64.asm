@@ -219,32 +219,26 @@ _find_task_frame:
 	call	_pop	;address of context frame
 	push	rax
 ftf1:
-	pop		rax
-	add		rax,8 ;
-	mov		rsi,[rax-8]
+	pop	rax
+	add	rax,8 ;
+	mov	rsi,[rax-8]
 	test	rsi,rsi
-	je		ftf		; last slot - zero
-	inc		rsi
-	je		ftf1
-	dec		rsi	
+	je	ftf		; last slot - zero
+	inc	rsi
+	je	ftf1
+	dec	rsi	
 	push	rax
 жmov	byte [0xb8158],"Q"
 	call	_sfind2
 	call	_pop ; flag. on stack rest xt
 	
 	test	rax,rax
-	je		ftf1		;nothing found in this context
+	je	ftf1		;nothing found in this context
 
-	pop		rax	
+	pop	rax	
 	ret
 ftf:
-	;
-	;mov		rax,badword_ ;cr_;_ret
-	;call	_push
-	;pop		rax
-;	xor		rax,rax
-;	call	_push
-;	call	_break
+
 	ret
 
 _find:
