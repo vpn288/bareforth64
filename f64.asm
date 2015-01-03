@@ -88,10 +88,8 @@ _dup:
 	ret
 ;-------------------------
 _interpret:
-	;call	_bl
-	
 	call	_word
-	mov		rax,context_value
+	mov	rax,context_value
 	call	_push
 	call	_find_task_frame
 	;call	_pop
