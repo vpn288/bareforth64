@@ -10,18 +10,18 @@ _break:
 	push	rax
 	push	rsi
 	call	os_print_newline
-	mov		rsi,_break2
+	mov	rsi,_break2
 	call	os_output
-	pop		rsi
-	mov		rax,[rsp+8]
+	pop	rsi
+	mov	rax,[rsp+8]
 	call	os_debug_dump_rax
-	pop		rax
+	pop	rax
 	call	os_dump_regs
 	push	rax
 _break1:
 	call	os_input_key
 	jnb	_break1
-	pop		rax
+	pop	rax
 	ret
 _break2	db	"Control point:",0
 
@@ -135,7 +135,7 @@ _enclose:
 ;mov	r13,[rsi]
 ;call	_break
 	cmp	rcx,rdx
-	jl	_word2	;jl
+	jl	_word2	
 
 	inc	rdi
 	
