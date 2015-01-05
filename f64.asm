@@ -324,8 +324,6 @@ _addr_interp:
 ;------------------
 
 _number:
-	;mov		rax,[block_value+8]
-	;mov		[block_value+8],rax ; [nkey],rax
 	mov		rsi,[block_value+16]	
 	xor	rdx,rdx 
 	add	rsi,[_in_value]
