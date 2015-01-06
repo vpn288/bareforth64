@@ -10,25 +10,25 @@ _break:
 	push	rax
 	push	rsi
 	call	os_print_newline
-	mov	rsi,_break2
+	mov		rsi,_break2
 	call	os_output
-	pop	rsi
-	mov	rax,[rsp+8]
+	pop		rsi
+	mov		rax,[rsp+8]
 	call	os_debug_dump_rax
-	pop	rax
+	pop		rax
 	call	os_dump_regs
 	push	rax
 _break1:
 	call	os_input_key
 	jnb	_break1
-	pop	rax
+	pop		rax
 	ret
 _break2	db	"Control point:",0
 
 ;------------------------------
   _pop:
-	mov rax , [ r10 + r8 ]
-	sub r10 , 8
+    mov rax , [ r10 + r8 ]
+    sub r10 , 8
 	and r10 , r9
 	ret
 ;------------------------------     
@@ -36,6 +36,7 @@ _break2	db	"Control point:",0
 	add r10 , 8
 	and r10 , r9
 	mov [ r10 + r8 ] , rax
+
 	ret
 ;--------------------------------
 _timer: 
@@ -44,6 +45,12 @@ _timer:
 	shrd	rax,rdx,32
 	call	_push
 	ret
+;---------------------
+	
+_filen: db	"forth.blk", 0
+fid:	dq	0
+msgf:	db	"forth>",0 
+
 ;-------------------------
 _count:
 	call	_pop
@@ -58,13 +65,15 @@ _count:
 	ret
 ;-------------------------
 _variable_code:
-	add	rax,8
+	add		rax,8
 	call	_push
 	ret
 ;-------------------------
 _execute_code:
 	call	_pop
 _execute:
+;mov		r14,[rax]
+;call	_break
 	call  [rax]
 	ret
 ;------------------------
@@ -88,8 +97,10 @@ _dup:
 	ret
 ;-------------------------
 _interpret:
+	;call	_bl
+	
 	call	_word
-	mov	rax,context_value
+	mov		rax,context_value
 	call	_push
 	call	_find_task_frame
 	;call	_pop
@@ -105,9 +116,11 @@ _bl:
 ;-------------------------
 ;get string from input buffer parse it and put to top of wordlist
 _word:
-	mov	rax,[block_value+16]
+	;mov		rax,[block_value+8]
+	;mov		[block_value+8] ; [nkey],rax
+	mov		rax,[block_value+16]
 	call	_push
-	mov	rax,[here_value]
+	mov		rax,[here_value]
 	call	_push
 	call	_enclose
 	ret
@@ -115,9 +128,9 @@ _word:
 ;--------------------------------
 _enclose:
 	call	_pop	;	to address
-	mov	rdi,rax
+	mov		rdi,rax
 	call	_pop	; from address
-	mov	rsi,rax
+	mov		rsi,rax
 	
 	xor	rdx,rdx
 	add	rsi,[_in_value]
@@ -128,26 +141,31 @@ _enclose:
 	rep	stosq
 	
 	mov	rdi,rbx
-	mov	rcx,[block_value+8] ; 
+	mov	rcx,[block_value+8] ; [nkey]
+;mov	r14,0x1
+;mov	r13,[rsi]
+;call	_break
 	cmp	rcx,rdx
-	jl	_word2	
+	jl	_word2	;jl
 
 	inc	rdi
 	
 _skip_delimeters:
 	
-	sub	qword [block_value+8],1 
+	sub	qword [block_value+8],1 ; [nkey],1
 	jb	_word2
 	lodsb
 	inc	qword [_in_value]
 	cmp	al,20h
 	jbe	_skip_delimeters
+			
+	;call	_skip_delimeters
 
 _word3:
 	
 	stosb
 	inc	rdx	
-	sub	qword [block_value+8],1 	
+	sub	qword [block_value+8],1 ; [nkey],1	
 	jb	_word4
 	lodsb
 	inc	qword [_in_value]	
@@ -159,16 +177,22 @@ _word4:
 	
 	; string to validate
 	mov	[rbx],dl
+;or	r14,0x7800
 	ret
 
 _word2:
 	
 	; empty string
-	mov	qword [rbx],6 
+	;mov	rsi,msg7
+	;call	os_output
+	mov	qword [rbx],6 ;dl
 	mov	qword [_in_value],0
 ;mov		r13,[rbx]
 ;mov		r14,0x67
 ;call	_break
+	
+	;mov	rax,[_in_value]
+	
 	ret
 ;------------------
 
@@ -212,26 +236,33 @@ _find_task_frame:
 	call	_pop	;address of context frame
 	push	rax
 ftf1:
-	pop	rax
-	add	rax,8 ;
-	mov	rsi,[rax-8]
+	pop		rax
+	add		rax,8 ;
+	mov		rsi,[rax-8]
 	test	rsi,rsi
-	je	ftf		; last slot - zero
-	inc	rsi
-	je	ftf1
-	dec	rsi	
+	je		ftf		; last slot - zero
+	inc		rsi
+	je		ftf1
+	dec		rsi	
 	push	rax
-жmov	byte [0xb8158],"Q"
+mov	byte [0xb8158],"Q"
 	call	_sfind2
 	call	_pop ; flag. on stack rest xt
 	
 	test	rax,rax
-	je	ftf1		;nothing found in this context
+	je		ftf1		;nothing found in this context
 
-	pop	rax	
+;	call	_push		;somefind found 
+	pop		rax	
 	ret
 ftf:
-
+	;
+	;mov		rax,badword_ ;cr_;_ret
+	;call	_push
+	;pop		rax
+;	xor		rax,rax
+;	call	_push
+;	call	_break
 	ret
 
 _find:
@@ -255,6 +286,13 @@ _find2:
 	inc	bl
 	and	bl,078h
 	mov	rdi,[here_value]
+	
+;push	rsi
+;mov		r12,[rdi]
+;mov		r11,[rsi]
+;rol		r14,1
+;call	_break
+;pop		rsi
 	cmpsq
 	je	_find1
 	add	rsi,rbx
@@ -276,8 +314,10 @@ _find2:
 	
 	test	rsi,rsi
 	jne	_find2
-	mov	rax,rcx
-	sub	rax,16
+	mov		rax,rcx
+	sub		rax,16
+	;add		rax,24 ;mov	rax,badword_ ;cr_;ret_
+;call	_break
 	call	_push
 	xor	rax,rax
 	call	_push
@@ -317,6 +357,8 @@ _addr_interp:
 ;------------------
 
 _number:
+	;mov		rax,[block_value+8]
+	;mov		[block_value+8],rax ; [nkey],rax
 	mov		rsi,[block_value+16]	
 	xor	rdx,rdx 
 	add	rsi,[_in_value]
@@ -607,6 +649,22 @@ _unlink:
 		mov		qword [rax+24],0
 		ret
 ;--------------------------------	
+label_code:
+		call create_code
+		mov rax,[here_value]
+		mov dword [rax-8],label_compile_code
+		call comma_code
+		ret
+;------------------------------
+label_compile_code:
+		mov rbx,[rax+8]
+		sub rbx,8
+		mov rax,[top_of_code_val]
+		sub rbx,rax
+		mov [rax],rbx
+		add qword [top_of_code_val],8
+		ret	
+;--------------------------
 code_top:
 mov	rax,0xAAAAAAAAAAAAAAAA
 mov	r11,0xBBBBBBBBBBBBBBBB
@@ -617,7 +675,7 @@ call	[r11]
 
 mov	rbx,rax
 sub	rax,rbx
-
+je	code_top
 align 32, db 0cch
 
 
