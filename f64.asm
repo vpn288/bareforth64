@@ -129,9 +129,6 @@ _enclose:
 	
 	mov	rdi,rbx
 	mov	rcx,[block_value+8] ; 
-;mov	r14,0x1
-;mov	r13,[rsi]
-;call	_break
 	cmp	rcx,rdx
 	jl	_word2	
 
@@ -167,8 +164,6 @@ _word4:
 _word2:
 	
 	; empty string
-	;mov	rsi,msg7
-	;call	os_output
 	mov	qword [rbx],6 
 	mov	qword [_in_value],0
 ;mov		r13,[rbx]
