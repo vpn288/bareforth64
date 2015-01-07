@@ -61,15 +61,13 @@ _count:
 	ret
 ;-------------------------
 _variable_code:
-	add		rax,8
+	add	rax,8
 	call	_push
 	ret
 ;-------------------------
 _execute_code:
 	call	_pop
 _execute:
-;mov		r14,[rax]
-;call	_break
 	call  [rax]
 	ret
 ;------------------------
