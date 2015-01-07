@@ -10,33 +10,32 @@ _break:
 	push	rax
 	push	rsi
 	call	os_print_newline
-	mov		rsi,_break2
+	mov	rsi,_break2
 	call	os_output
-	pop		rsi
-	mov		rax,[rsp+8]
+	pop	rsi
+	mov	rax,[rsp+8]
 	call	os_debug_dump_rax
-	pop		rax
+	pop	rax
 	call	os_dump_regs
 	push	rax
 _break1:
 	call	os_input_key
 	jnb	_break1
-	pop		rax
+	pop	rax
 	ret
 _break2	db	"Control point:",0
 
 ;------------------------------
-  _pop:
-    mov rax , [ r10 + r8 ]
-    sub r10 , 8
+_pop:
+	mov rax , [ r10 + r8 ]
+    	sub r10 , 8
 	and r10 , r9
 	ret
 ;------------------------------     
-  _push:
+_push:
 	add r10 , 8
 	and r10 , r9
 	mov [ r10 + r8 ] , rax
-
 	ret
 ;--------------------------------
 _timer: 
@@ -47,8 +46,6 @@ _timer:
 	ret
 ;---------------------
 	
-_filen: db	"forth.blk", 0
-fid:	dq	0
 msgf:	db	"forth>",0 
 
 ;-------------------------
@@ -60,7 +57,6 @@ _count:
 	inc	rax
 	call	_push
 	mov	rax,rbx
-	
 	call	_push
 	ret
 ;-------------------------
