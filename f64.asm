@@ -68,20 +68,20 @@ _variable_code:
 _execute_code:
 	call	_pop
 _execute:
-	call  [rax]
+	call   [rax]
 	ret
 ;------------------------
 _fetch:
-	call _pop
-	mov rax,[rax]
-	call _push
+	call   _pop
+	mov    rax,[rax]
+	call   _push
 	ret
 ;-------------------------
 _store:
 	call	_pop	; address
-	mov		rbx,rax
+	mov	rbx,rax
 	call	_pop	;data
-	mov		[rbx],rax
+	mov	[rbx],rax
 	ret
 ;-------------------------
 _dup:
@@ -91,10 +91,8 @@ _dup:
 	ret
 ;-------------------------
 _interpret:
-	;call	_bl
-	
 	call	_word
-	mov		rax,context_value
+	mov	rax,context_value
 	call	_push
 	call	_find_task_frame
 	;call	_pop
