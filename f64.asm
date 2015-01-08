@@ -95,10 +95,6 @@ _interpret:
 	mov	rax,context_value
 	call	_push
 	call	_find_task_frame
-	;call	_pop
-	;call	_hex_dot	
-		;call	_dup	
-		;call	_hex_dot	
 	call	_execute_code
 	jmp	_interpret
 
