@@ -104,11 +104,9 @@ _bl:
 ;-------------------------
 ;get string from input buffer parse it and put to top of wordlist
 _word:
-	;mov		rax,[block_value+8]
-	;mov		[block_value+8] ; [nkey],rax
-	mov		rax,[block_value+16]
+	mov	rax,[block_value+16]
 	call	_push
-	mov		rax,[here_value]
+	mov	rax,[here_value]
 	call	_push
 	call	_enclose
 	ret
