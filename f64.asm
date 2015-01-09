@@ -114,9 +114,9 @@ _word:
 ;--------------------------------
 _enclose:
 	call	_pop	;	to address
-	mov		rdi,rax
+	mov	rdi,rax
 	call	_pop	; from address
-	mov		rsi,rax
+	mov	rsi,rax
 	
 	xor	rdx,rdx
 	add	rsi,[_in_value]
@@ -128,9 +128,6 @@ _enclose:
 	
 	mov	rdi,rbx
 	mov	rcx,[block_value+8] ; [nkey]
-;mov	r14,0x1
-;mov	r13,[rsi]
-;call	_break
 	cmp	rcx,rdx
 	jl	_word2	;jl
 
