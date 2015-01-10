@@ -127,7 +127,7 @@ _enclose:
 	rep	stosq
 	
 	mov	rdi,rbx
-	mov	rcx,[block_value+8] ; [nkey]
+	mov	rcx,[block_value+8] 
 	cmp	rcx,rdx
 	jl	_word2	;jl
 
