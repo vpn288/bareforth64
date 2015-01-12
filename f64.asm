@@ -129,7 +129,7 @@ _enclose:
 	mov	rdi,rbx
 	mov	rcx,[block_value+8] 
 	cmp	rcx,rdx
-	jl	_word2	;jl
+	jl	_word2	
 
 	inc	rdi
 	
@@ -142,13 +142,12 @@ _skip_delimeters:
 	cmp	al,20h
 	jbe	_skip_delimeters
 			
-	;call	_skip_delimeters
 
 _word3:
 	
 	stosb
 	inc	rdx	
-	sub	qword [block_value+8],1 ; [nkey],1	
+	sub	qword [block_value+8],1 	
 	jb	_word4
 	lodsb
 	inc	qword [_in_value]	
