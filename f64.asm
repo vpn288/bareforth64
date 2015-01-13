@@ -159,7 +159,6 @@ _word4:
 	
 	; string to validate
 	mov	[rbx],dl
-;or	r14,0x7800
 	ret
 
 _word2:
