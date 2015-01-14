@@ -164,8 +164,6 @@ _word4:
 _word2:
 	
 	; empty string
-	;mov	rsi,msg7
-	;call	os_output
 	mov	qword [rbx],6 ;dl
 	mov	qword [_in_value],0
 ;mov		r13,[rbx]
