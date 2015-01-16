@@ -166,12 +166,6 @@ _word2:
 	; empty string
 	mov	qword [rbx],6 ;dl
 	mov	qword [_in_value],0
-;mov		r13,[rbx]
-;mov		r14,0x67
-;call	_break
-	
-	;mov	rax,[_in_value]
-	
 	ret
 ;------------------
 
