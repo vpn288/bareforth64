@@ -169,14 +169,8 @@ _word2:
 	ret
 ;------------------
 
-	
-
-
-;msg2	db	' String prepared to find:',0
 msg7	db	' empty string ',0
-;msg8	db	' push symbol ',0
-;msg5	db	' skips ',0
-;msg6	db	' source string ',0
+
 ;-------------------------------
 ;search string from here in wordlist
 _find_task:
