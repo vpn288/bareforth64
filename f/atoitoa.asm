@@ -3,14 +3,14 @@ _hex_dot:
         mov	[value],rax
         movdqu xmm0, [value] ;
         pxor xmm1,xmm1
-        punpcklbw xmm0,xmm1
-        movdqa xmm1,xmm0
-        pand xmm1,[fes]
-        psllq xmm0,4
-        pand xmm0,[fes]
-        por xmm0,xmm1
-        movdqa xmm1,xmm0
-        paddb xmm1,[sixes]
+        punpcklbw xmm0,xmm1 ; interleave bytes of value with nulls 
+        movdqa xmm1,xmm0 ; copy
+        pand xmm1,[fes] ; mask tetrades
+        psllq xmm0,4 ; 
+        pand xmm0,[fes] ;
+        por xmm0,xmm1 ; assembly tetrades
+        movdqa xmm1,xmm0 
+        paddb xmm1,[sixes] ;
         psrlq xmm1,4
         pand xmm1,[fes]
         pxor xmm9,xmm9
