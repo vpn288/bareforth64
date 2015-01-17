@@ -5,9 +5,9 @@ _hex_dot:
         pxor xmm1,xmm1
         punpcklbw xmm0,xmm1 ; interleave bytes of value with nulls 
         movdqa xmm1,xmm0 ; copy
-        pand xmm1,[fes] ; mask tetrades
+        pand xmm1,[fes] ; mask tetrades xmm1 - low tetrades
         psllq xmm0,4 ; 
-        pand xmm0,[fes] ;
+        pand xmm0,[fes] ; xmm0 - high tetrades
         por xmm0,xmm1 ; assembly tetrades
         movdqa xmm1,xmm0 
         paddb xmm1,[sixes] ;
