@@ -222,13 +222,7 @@ ftf1:
 	pop		rax	
 	ret
 ftf:
-	;
-	;mov		rax,badword_ ;cr_;_ret
-	;call	_push
-	;pop		rax
-;	xor		rax,rax
-;	call	_push
-;	call	_break
+	
 	ret
 
 _find:
