@@ -212,14 +212,13 @@ ftf1:
 	je		ftf1
 	dec		rsi	
 	push	rax
-mov	byte [0xb8158],"Q"
 	call	_sfind2
 	call	_pop ; flag. on stack rest xt
 	
 	test	rax,rax
 	je		ftf1		;nothing found in this context
 
-;	call	_push		;somefind found 
+		;somefind found 
 	pop		rax	
 	ret
 ftf:
