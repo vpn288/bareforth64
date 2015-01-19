@@ -237,10 +237,7 @@ _sfind:
 
 _sfind2:
 	mov	rsi,[rsi] ;vocid
-;push	rsi
-;mov		rsi,rdi
-;call	os_output
-;pop		rsi
+
 _find2:
 	movzx	rbx,byte [rsi]
 	inc	bl
