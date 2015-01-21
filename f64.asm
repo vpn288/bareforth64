@@ -243,13 +243,6 @@ _find2:
 	inc	bl
 	and	bl,078h
 	mov	rdi,[here_value]
-	
-;push	rsi
-;mov		r12,[rdi]
-;mov		r11,[rsi]
-;rol		r14,1
-;call	_break
-;pop		rsi
 	cmpsq
 	je	_find1
 	add	rsi,rbx
