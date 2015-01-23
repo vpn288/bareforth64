@@ -266,8 +266,6 @@ _find2:
 	jne	_find2
 	mov		rax,rcx
 	sub		rax,16
-	;add		rax,24 ;mov	rax,badword_ ;cr_;ret_
-;call	_break
 	call	_push
 	xor	rax,rax
 	call	_push
