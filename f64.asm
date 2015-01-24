@@ -320,8 +320,6 @@ _number:
 	mov	rdi,rbx
 	mov	rcx,[block_value+8] ; [nkey]
 	cmp	rcx,rdx ; rdx=0
-;mov	r13,[rsi]
-;call	_break
 	jl	number2 
 
 	inc	rdi
