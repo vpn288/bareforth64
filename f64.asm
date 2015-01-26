@@ -330,7 +330,6 @@ _skip_delimeters2:
 	cmp	al,20h
 	jbe	_skip_delimeters2
 			
-	;call	_skip_delimeters
 	mov		rdi,[here_value]
 	add		rdi,15
 	
@@ -338,7 +337,7 @@ number3:
 	; move to here +15
 	stosb
 	inc	rdx
-	sub	qword [block_value+8],1 ; [nkey],1	
+	sub	qword [block_value+8],1 ; 
 	jb	number4
 	lodsb
 	inc	qword [_in_value]	
