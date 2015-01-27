@@ -203,23 +203,23 @@ _find_task_frame:
 	call	_pop	;address of context frame
 	push	rax
 ftf1:
-	pop		rax
-	add		rax,8 ;
-	mov		rsi,[rax-8]
+	pop	rax
+	add	rax,8 ;
+	mov	rsi,[rax-8]
 	test	rsi,rsi
-	je		ftf		; last slot - zero
-	inc		rsi
-	je		ftf1
-	dec		rsi	
+	je	ftf		; last slot - zero
+	inc	rsi
+	je	ftf1
+	dec	rsi	
 	push	rax
 	call	_sfind2
 	call	_pop ; flag. on stack rest xt
 	
 	test	rax,rax
-	je		ftf1		;nothing found in this context
+	je	ftf1		;nothing found in this context
 
 		;somefind found 
-	pop		rax	
+	pop	rax	
 	ret
 ftf:
 	
@@ -323,7 +323,7 @@ _number:
 	inc	rdi
 _skip_delimeters2:
 	
-	sub	qword [block_value+8],1 ; [nkey],1
+	sub	qword [block_value+8],1 ; 
 	je	number2
 	lodsb
 	inc	qword [_in_value]
