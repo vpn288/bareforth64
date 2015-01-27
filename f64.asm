@@ -458,10 +458,6 @@ mov	qword [rsi-8],_abort
 	mov	qword [rsi],_ret
 	add	rsi,8
 	mov	[here_value],rsi
-		
-	;mov		rax,rsi
-	;call	_push
-	;call	_hex_dot
 	ret
 ;--------------------------------
 _cellp:
