@@ -316,7 +316,7 @@ _number:
 	rep	stosb
 	
 	mov	rdi,rbx
-	mov	rcx,[block_value+8] ; [nkey]
+	mov	rcx,[block_value+8] ; 
 	cmp	rcx,rdx ; rdx=0
 	jl	number2 
 
@@ -330,8 +330,8 @@ _skip_delimeters2:
 	cmp	al,20h
 	jbe	_skip_delimeters2
 			
-	mov		rdi,[here_value]
-	add		rdi,15
+	mov	rdi,[here_value]
+	add	rdi,15
 	
 number3:
 	; move to here +15
@@ -348,8 +348,6 @@ number4:
 	;normalize number
 	; rdx - count of digits
 	sub		rdi,16
-;mov	r14,[rdi+8]
-;call	_break
 	mov		rax,rdi
 	call	_push
 	ret
