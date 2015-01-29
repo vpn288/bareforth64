@@ -378,8 +378,7 @@ nlink2:
 _name:
 	call	_pop
 	call	nlink2
-	;add		rsi,8
-	mov		rax,rsi
+	mov	rax,rsi
 	call	_push
 	ret
 ;--------------------------
