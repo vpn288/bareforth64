@@ -442,8 +442,7 @@ _vocabulary_create:
 	mov	qword [rsi],_vocabulary
 	add	rsi,24
 	mov	[rsi-16],rsi	;link to empty word, which is last in this list
-;mov	qword [rsi-16],_vect	
-mov	qword [rsi-8],_abort
+	mov	qword [rsi-8],_abort
 ;add	rsi,8
 	; set zero word 
 	mov	qword [rsi],6
