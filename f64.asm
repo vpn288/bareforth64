@@ -437,13 +437,12 @@ _comma:
 _vocabulary_create:
 	call	_header
 	mov	rsi,[here_value]
-	mov		rax,rsi
+	mov	rax,rsi
 	
 	mov	qword [rsi],_vocabulary
 	add	rsi,24
 	mov	[rsi-16],rsi	;link to empty word, which is last in this list
 	mov	qword [rsi-8],_abort
-;add	rsi,8
 	; set zero word 
 	mov	qword [rsi],6
 	add	rsi,8
@@ -469,7 +468,7 @@ _cellm:
 
 _allot:
 	call	_pop
-	add		[here_value],rax
+	add	[here_value],rax
 	ret
 ;--------------------------------
 _vect:
@@ -495,8 +494,8 @@ _load:
 	push	qword [block_value+16]
 	push	qword [_in_value]
 	
-	mov		rax, buffer_+8
-	mov		[block_value+16],rax
+	mov	rax, buffer_+8
+	mov	[block_value+16],rax
 	call	_push
 	call	_rdblock
 	
