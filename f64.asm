@@ -499,7 +499,7 @@ _load:
 	call	_push
 	call	_rdblock
 	
-	xor		rbx,rbx
+	xor	rbx,rbx
 	mov		[_in_value],rbx
 	mov		qword [block_value+8],8192
 	
