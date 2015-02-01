@@ -264,8 +264,8 @@ _find2:
 	
 	test	rsi,rsi
 	jne	_find2
-	mov		rax,rcx
-	sub		rax,16
+	mov	rax,rcx
+	sub	rax,16
 	call	_push
 	xor	rax,rax
 	call	_push
@@ -295,17 +295,17 @@ _constant:
 	ret
 ;----------------------
 _addr_interp:
-	add rax,8
-	push rax
-	mov rax,[rax]
-	call qword [rax]
-	pop rax
-	jmp _addr_interp
+	add 	rax,8
+	push 	rax
+	mov 	rax,[rax]
+	call 	qword [rax]
+	pop 	rax
+	jmp 	_addr_interp
 
 ;------------------
 
 _number:
-	mov		rsi,[block_value+16]	
+	mov	rsi,[block_value+16]	
 	xor	rdx,rdx 
 	add	rsi,[_in_value]
 	mov	rdi,[here_value]
