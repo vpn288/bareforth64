@@ -7,19 +7,19 @@
 ; -----------------------------------------------------------------------------
 ; Default exception handler
 exception_gate:
-mov rsi, int_string
-call os_print_string
-mov rsi, exc_string
-call os_print_string
+	mov rsi, int_string
+	call os_print_string
+	mov rsi, exc_string
+	call os_print_string
 exception_gate_halt:
-cli	; Disable interrupts
-hlt	; Halt the system
-jmp exception_gate_halt
+	cli	; Disable interrupts
+	hlt	; Halt the system
+	jmp exception_gate_halt
 ; -----------------------------------------------------------------------------
 ; -----------------------------------------------------------------------------
 ; Default interrupt handler
 interrupt_gate: ; handler for all other interrupts
-iretq
+	iretq
 ; -----------------------------------------------------------------------------
 ; -----------------------------------------------------------------------------
 ; Keyboard interrupt. IRQ 0x01, INT 0x21
@@ -66,7 +66,6 @@ keyboard_processkey:			; Convert the scancode
 	add rbx, rax
 	mov bl, [rbx]
 	mov [key], bl
-	;mov al, [key]
 	jmp keyboard_done
 	
 keyboard_caps:
