@@ -175,12 +175,6 @@ latest_:
 	dq	_latest
 	dq	0
 	
-	;dq	_addr_interp
-	;dq	current_
-	;dq	fetch_
-	;dq	fetch_
-	;dq	ret_
-	
 nfa_21:
 	db	7,"BADWORD",0
 	align 8, db 0
