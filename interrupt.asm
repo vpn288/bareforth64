@@ -87,13 +87,9 @@ keyboard_noshift:
 	jmp keyboard_done
 
 keyboard_done:
-	;mov rdi, [os_LocalAPICAddress]	; Acknowledge the IRQ on APIC
-	;add rdi, 0xB0
-	;xor eax, eax
-	mov al, 0x20	; Acknowledge the IRQ
-	out 0x20, al;stosd
-	;call os_smp_wakeup_all		; A terrible hack
 
+	mov al, 0x20	; Acknowledge the IRQ
+	out 0x20, al;
 	pop rax
 	pop rbx
 	pop rdi
